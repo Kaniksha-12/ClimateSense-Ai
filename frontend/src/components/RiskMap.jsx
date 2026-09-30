@@ -77,7 +77,7 @@ export default function RiskMap({ mapZones = DEV_DATA.mapZones, isLive = false }
                   className={`spatial-node node-pos-${(idx % 3) + 1} ${isSelected ? 'active' : ''}`}
                   style={{
                     borderColor: color,
-                    boxShadow: `0 0 ${isSelected ? '20px' : '10px'} ${color}80`,
+                    backgroundColor: isSelected ? 'rgba(30, 41, 59, 0.95)' : 'rgba(15, 23, 42, 0.85)',
                   }}
                   title={zone.name}
                 >

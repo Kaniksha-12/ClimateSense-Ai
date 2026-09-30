@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from 'react';
 
 const BOOT_STEPS = [
-  { id: 'sys', text: 'SYSTEM INITIALIZING...', detail: 'Kernel v4.2 • Core memory mapped' },
-  { id: 'env', text: 'ENVIRONMENTAL DATA // INGESTION ONLINE', detail: 'Weather sensors & AQI telemetry connected' },
-  { id: 'ml', text: 'AI RISK ENGINE // MODEL INTERFACES LOADED', detail: 'XGBoost • Random Forest • LSTM baselines active' },
-  { id: 'gis', text: 'GIS INTELLIGENCE // SPATIAL MATRIX READY', detail: 'GeoJSON vector layer & coordinate grid aligned' },
-  { id: 'warn', text: 'EARLY WARNING // TELEMETRY WATCH ARMED', detail: 'Multi-hazard threshold triggers enabled' },
+  { id: 'env', text: 'Connecting environmental data providers', detail: 'Weather observations & AQI metrics' },
+  { id: 'ml', text: 'Initializing climate model registry', detail: 'Flood, drought, heatwave & AQI interfaces' },
+  { id: 'gis', text: 'Loading spatial GIS layers', detail: 'GeoJSON regional monitoring boundaries' },
+  { id: 'warn', text: 'Configuring early warning alert thresholds', detail: 'Multi-hazard notification engine' },
 ];
 
 export default function BootSequence({ onComplete }) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
-  const [progress, setProgress] = useState(15);
+  const [progress, setProgress] = useState(25);
   const [isFadingOut, setIsFadingOut] = useState(false);
 
   useEffect(() => {
-    // Step advancement timer
     const interval = setInterval(() => {
       setCurrentStepIndex((prev) => {
         if (prev < BOOT_STEPS.length - 1) {
@@ -26,88 +24,83 @@ export default function BootSequence({ onComplete }) {
           setProgress(100);
           setTimeout(() => {
             setIsFadingOut(true);
-            setTimeout(onComplete, 500);
-          }, 400);
+            setTimeout(onComplete, 350);
+          }, 300);
           return prev;
         }
       });
-    }, 450);
+    }, 350);
 
     return () => clearInterval(interval);
   }, [onComplete]);
 
   const handleSkip = () => {
     setIsFadingOut(true);
-    setTimeout(onComplete, 200);
+    setTimeout(onComplete, 150);
   };
 
   return (
     <div className={`boot-overlay ${isFadingOut ? 'fade-out' : ''}`}>
-      <div className="boot-terminal">
-        {/* Terminal Header */}
-        <div className="boot-header">
-          <div className="boot-reticle-group">
-            <span className="boot-reticle-dot"></span>
-            <span className="boot-header-title">CLIMATESENSE AI // INITIALIZATION SEQUENCE</span>
+      <div className="boot-dialog">
+        {/* Header */}
+        <div className="boot-dialog-header">
+          <div className="boot-brand-wrap">
+            <span className="boot-icon">🌍</span>
+            <div>
+              <h2 className="boot-app-name">ClimateSense AI</h2>
+              <span className="boot-app-tagline">Climate Risk Monitoring &amp; Early Warning System</span>
+            </div>
           </div>
           <button type="button" className="boot-skip-btn" onClick={handleSkip}>
-            SKIP [ESC] ➔
+            Skip ➔
           </button>
         </div>
 
-        {/* Radar / Reticle Centerpiece */}
-        <div className="boot-center-graphic">
-          <div className="boot-radar-circle outer"></div>
-          <div className="boot-radar-circle middle"></div>
-          <div className="boot-radar-circle inner"></div>
-          <div className="boot-radar-sweep"></div>
-          <div className="boot-radar-crosshair-h"></div>
-          <div className="boot-radar-crosshair-v"></div>
-          <div className="boot-center-brand">
-            <span className="boot-brand-globe">🌍</span>
-            <span className="boot-brand-text">CLIMATESENSE</span>
-          </div>
-        </div>
-
-        {/* Progress Display */}
-        <div className="boot-progress-section">
-          <div className="boot-progress-info">
-            <span className="boot-progress-label">INITIALIZING SYSTEM PIPELINE</span>
-            <span className="boot-progress-pct">{progress}%</span>
+        {/* Progress Bar */}
+        <div className="boot-progress-wrap">
+          <div className="boot-progress-header">
+            <span className="boot-progress-title">Starting system services...</span>
+            <span className="boot-progress-value">{progress}%</span>
           </div>
           <div className="boot-progress-track">
-            <div className="boot-progress-fill" style={{ width: `${progress}%` }}></div>
+            <div className="boot-progress-bar" style={{ width: `${progress}%` }}></div>
           </div>
         </div>
 
-        {/* Terminal Step Logs */}
-        <div className="boot-log-feed">
+        {/* Checklist */}
+        <div className="boot-steps-list">
           {BOOT_STEPS.map((step, idx) => {
-            const isCompleted = idx < currentStepIndex;
+            const isDone = idx < currentStepIndex;
             const isCurrent = idx === currentStepIndex;
-            const isPending = idx > currentStepIndex;
 
             return (
               <div
                 key={step.id}
-                className={`boot-log-item ${isCurrent ? 'active' : ''} ${isCompleted ? 'done' : ''} ${
-                  isPending ? 'pending' : ''
-                }`}
+                className={`boot-step-row ${isCurrent ? 'current' : ''} ${isDone ? 'done' : 'waiting'}`}
               >
-                <span className="boot-log-status">
-                  {isCompleted ? '✓ READY' : isCurrent ? '▶ LOAD' : '○ WAIT'}
-                </span>
-                <span className="boot-log-name">{step.text}</span>
-                <span className="boot-log-detail">{step.detail}</span>
+                <div className="boot-step-indicator">
+                  {isDone ? (
+                    <span className="step-check">✓</span>
+                  ) : isCurrent ? (
+                    <span className="step-spinner"></span>
+                  ) : (
+                    <span className="step-bullet">○</span>
+                  )}
+                </div>
+                <div className="boot-step-content">
+                  <span className="boot-step-title">{step.text}</span>
+                  <span className="boot-step-subtext">{step.detail}</span>
+                </div>
               </div>
             );
           })}
         </div>
 
-        <div className="boot-footer-meta">
-          <span>SECURE TELEMETRY LINK • PORT 8000</span>
-          <span>DEV_DATA FALLBACK ARMED</span>
-          <span>GEOSPATIAL WGS-84</span>
+        {/* Footer info */}
+        <div className="boot-dialog-footer">
+          <span>FastAPI Backend • Port 8000</span>
+          <span>GeoJSON WGS-84</span>
+          <span>Development Prototype</span>
         </div>
       </div>
     </div>

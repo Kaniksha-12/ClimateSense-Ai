@@ -17,16 +17,21 @@ export default function Header({
   return (
     <header className="header-container">
       <div className="header-content">
-        <div className="brand-section" onClick={() => onNavigate('landing')} style={{ cursor: 'pointer' }}>
+        <div
+          className="brand-section"
+          onClick={() => onNavigate('landing')}
+          style={{ cursor: 'pointer' }}
+          title="Return to home page"
+        >
           <div className="brand-icon">🌍</div>
           <div className="brand-titles">
             <div className="brand-header-row">
               <h1>ClimateSense AI</h1>
               <span className="brand-layer-tag">
-                {viewMode === 'cockpit' ? 'COCKPIT v1.0' : 'INTELLIGENCE'}
+                {viewMode === 'cockpit' ? 'Dashboard' : 'Research Prototype'}
               </span>
             </div>
-            <p>AI-Powered Climate Intelligence &amp; Early Warning System</p>
+            <p>Climate Risk Monitoring &amp; Early Warning System</p>
           </div>
         </div>
 
@@ -35,13 +40,13 @@ export default function Header({
           {viewMode === 'landing' ? (
             <>
               <button type="button" onClick={() => scrollTo('section-observe')} className="nav-link">
-                Observe
+                Monitoring
               </button>
               <button type="button" onClick={() => scrollTo('section-predict')} className="nav-link">
-                Predict
+                Predictions
               </button>
               <button type="button" onClick={() => scrollTo('section-map')} className="nav-link">
-                GIS Map
+                Risk Map
               </button>
               <button type="button" onClick={() => scrollTo('section-warn')} className="nav-link">
                 Alerts
@@ -54,7 +59,7 @@ export default function Header({
                 onClick={() => onNavigate('cockpit')}
                 className="nav-link nav-link-highlight"
               >
-                Enter Cockpit ➔
+                Open Dashboard ➔
               </button>
             </>
           ) : (
@@ -64,14 +69,14 @@ export default function Header({
                 onClick={() => onNavigate('landing')}
                 className="nav-link nav-link-return"
               >
-                ← Mission Brief
+                ← Overview
               </button>
               <button
                 type="button"
                 onClick={() => onSelectWorkspace && onSelectWorkspace('overview')}
                 className={`nav-link ${activeWorkspace === 'overview' ? 'active' : ''}`}
               >
-                Overview
+                Summary
               </button>
               <button
                 type="button"

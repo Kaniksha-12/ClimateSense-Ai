@@ -42,7 +42,6 @@ export default function DashboardOverview({
       setIsLiveBackend(live);
       if (onStatusChange) onStatusChange(live);
 
-      // Concurrently query all backend v1 endpoints
       const [wRes, aqiRes, rRes, pRes, mapRes, alRes] = await Promise.all([
         getWeather(),
         getAQI(),
@@ -82,7 +81,7 @@ export default function DashboardOverview({
 
   return (
     <main className="dashboard-main cockpit-application">
-      {/* COCKPIT COMMAND SITUATION BAR */}
+      {/* DASHBOARD TOP SITUATION BAR */}
       <section className="cockpit-situation-bar">
         <div className="situation-left">
           {onBackToLanding && (
@@ -90,18 +89,18 @@ export default function DashboardOverview({
               type="button"
               className="cockpit-back-btn"
               onClick={onBackToLanding}
-              title="Return to Story & System Architecture"
+              title="Return to project overview"
             >
-              ← Mission Brief
+              ← Overview
             </button>
           )}
           <div className="cockpit-title-group">
-            <span className="cockpit-tag">COMMAND APPLICATION // LAYER 2</span>
-            <h2 className="cockpit-title">Climate Intelligence Cockpit</h2>
+            <span className="cockpit-tag">Monitoring Dashboard</span>
+            <h2 className="cockpit-title">Climate Risk Dashboard</h2>
           </div>
         </div>
 
-        {/* Cockpit Workspace Navigation Tabs */}
+        {/* Workspace Navigation Tabs */}
         <div className="cockpit-nav-tabs">
           <button
             type="button"
@@ -109,7 +108,7 @@ export default function DashboardOverview({
             onClick={() => setActiveWorkspace('overview')}
           >
             <span className="tab-icon">📊</span>
-            <span className="tab-name">Overview</span>
+            <span className="tab-name">Summary</span>
           </button>
 
           <button
@@ -149,43 +148,43 @@ export default function DashboardOverview({
             className={`cockpit-tab ${activeWorkspace === 'all' ? 'active' : ''}`}
             onClick={() => setActiveWorkspace('all')}
           >
-            <span className="tab-icon">⚡</span>
-            <span className="tab-name">All Workspaces</span>
+            <span className="tab-icon">📋</span>
+            <span className="tab-name">All Views</span>
           </button>
         </div>
 
-        {/* Cockpit Telemetry Status & Manual Sync */}
+        {/* Sync Controls */}
         <div className="situation-right">
           <div className="cockpit-sync-group">
             <button
               type="button"
               onClick={handleManualRefresh}
               className="refresh-btn cockpit-refresh"
-              title="Sync with backend API"
+              title="Fetch latest data from API"
               disabled={isRefreshing}
             >
               {isRefreshing ? 'Syncing...' : '↻ Sync Data'}
             </button>
             <span className="cockpit-sync-time">
-              {lastSyncTime ? `Synced: ${lastSyncTime}` : 'Telemetry Initialized'}
+              {lastSyncTime ? `Updated: ${lastSyncTime}` : 'Loaded'}
             </span>
           </div>
         </div>
       </section>
 
-      {/* WORKSPACE 1: OVERVIEW */}
+      {/* WORKSPACE 1: SUMMARY / OVERVIEW */}
       {(activeWorkspace === 'overview' || activeWorkspace === 'all') && (
         <div className="workspace-block fade-in" id="overview">
-          {/* SECTION G: VISUALLY PROMINENT OVERALL RISK SUMMARY */}
+          {/* OVERALL RISK ASSESSMENT */}
           <section className="overall-risk-hero">
             <div className="overall-risk-container">
               <div className="overall-risk-left">
                 <div className="hero-top-row">
-                  <span className="risk-hero-badge">Regional Environmental Intelligence</span>
-                  <span className="workspace-badge">WORKSPACE: OVERVIEW</span>
+                  <span className="risk-hero-badge">Regional Risk Synthesis</span>
+                  <span className="workspace-badge">Summary View</span>
                 </div>
 
-                <h2 className="overall-risk-heading">Overall Climate Risk Assessment</h2>
+                <h2 className="overall-risk-heading">Climate Risk Assessment</h2>
                 <p className="overall-risk-location">
                   📍 {overallRisk.location || 'National Capital Region'}
                   {lastSyncTime && <span className="sync-timestamp"> • Updated: {lastSyncTime}</span>}
@@ -196,14 +195,13 @@ export default function DashboardOverview({
                     className="overall-score-circle"
                     style={{
                       borderColor: overallMeta.color,
-                      boxShadow: `0 0 30px ${overallMeta.color}35`,
                     }}
                   >
                     <span className="circle-score-val">{overallRisk.overall_risk_score}</span>
                     <span className="circle-score-max">/ 100</span>
                   </div>
                   <div className="overall-level-callout">
-                    <span className="level-subtitle">Assessed Risk Tier</span>
+                    <span className="level-subtitle">Assessed Risk Level</span>
                     <span
                       className="level-badge-large"
                       style={{
@@ -216,7 +214,7 @@ export default function DashboardOverview({
                     </span>
                     <span className="risk-model-disclaimer">
                       {isLiveBackend
-                        ? 'Synthesized live from Member 2 model registry & prediction service (/api/v1/risk)'
+                        ? 'Synthesized from prediction models via /api/v1/risk'
                         : 'Multi-hazard baseline • Ready for calibrated model inputs'}
                     </span>
                   </div>
@@ -228,7 +226,7 @@ export default function DashboardOverview({
                 <div className="hazard-bars-list">
                   <div className="hazard-bar-row">
                     <div className="hazard-bar-info">
-                      <span>🌊 Flood Risk</span>
+                      <span>🌊 Flood Risk (Weight: 35%)</span>
                       <span className="hazard-bar-num">{overallRisk.flood_risk}%</span>
                     </div>
                     <div className="hazard-bar-track">
@@ -236,7 +234,7 @@ export default function DashboardOverview({
                         className="hazard-bar-fill"
                         style={{
                           width: `${overallRisk.flood_risk}%`,
-                          backgroundColor: '#f97316',
+                          backgroundColor: '#ea580c',
                         }}
                       ></div>
                     </div>
@@ -244,7 +242,7 @@ export default function DashboardOverview({
 
                   <div className="hazard-bar-row">
                     <div className="hazard-bar-info">
-                      <span>☀️ Drought Risk</span>
+                      <span>☀️ Drought Risk (Weight: 20%)</span>
                       <span className="hazard-bar-num">{overallRisk.drought_risk}%</span>
                     </div>
                     <div className="hazard-bar-track">
@@ -252,7 +250,7 @@ export default function DashboardOverview({
                         className="hazard-bar-fill"
                         style={{
                           width: `${overallRisk.drought_risk}%`,
-                          backgroundColor: '#10b981',
+                          backgroundColor: '#059669',
                         }}
                       ></div>
                     </div>
@@ -260,7 +258,7 @@ export default function DashboardOverview({
 
                   <div className="hazard-bar-row">
                     <div className="hazard-bar-info">
-                      <span>🔥 Heatwave Risk</span>
+                      <span>🔥 Heatwave Risk (Weight: 20%)</span>
                       <span className="hazard-bar-num">{overallRisk.heatwave_risk}%</span>
                     </div>
                     <div className="hazard-bar-track">
@@ -268,7 +266,7 @@ export default function DashboardOverview({
                         className="hazard-bar-fill"
                         style={{
                           width: `${overallRisk.heatwave_risk}%`,
-                          backgroundColor: '#f59e0b',
+                          backgroundColor: '#d97706',
                         }}
                       ></div>
                     </div>
@@ -276,7 +274,7 @@ export default function DashboardOverview({
 
                   <div className="hazard-bar-row">
                     <div className="hazard-bar-info">
-                      <span>💨 Air Quality Risk</span>
+                      <span>💨 Air Quality Risk (Weight: 25%)</span>
                       <span className="hazard-bar-num">{overallRisk.air_quality_risk}%</span>
                     </div>
                     <div className="hazard-bar-track">
@@ -284,25 +282,25 @@ export default function DashboardOverview({
                         className="hazard-bar-fill"
                         style={{
                           width: `${overallRisk.air_quality_risk}%`,
-                          backgroundColor: '#ef4444',
+                          backgroundColor: '#dc2626',
                         }}
                       ></div>
                     </div>
                   </div>
                 </div>
                 <div className="breakdown-footer-tag">
-                  Status: <strong>{isLiveBackend ? 'Connected to' : 'Mocking'}</strong> <code>GET /api/v1/risk</code>
+                  Endpoint: <code>GET /api/v1/risk</code> ({isLiveBackend ? 'Live API' : 'Fallback Baseline'})
                 </div>
               </div>
             </div>
           </section>
 
-          {/* SECTION B: CURRENT ENVIRONMENTAL CONDITIONS */}
+          {/* ENVIRONMENTAL CONDITIONS */}
           <section className="dashboard-section">
             <SectionHeader
-              title="Current Environmental Conditions"
-              subtitle="Real-time atmospheric observations and pollution sensor telemetry."
-              badge={isLiveBackend ? 'Live API Feed (/weather, /aqi)' : 'Demo Baseline'}
+              title="Environmental Conditions"
+              subtitle="Current atmospheric and particulate matter sensor observations."
+              badge={isLiveBackend ? 'Live API (/weather, /aqi)' : 'Demo Baseline'}
             />
             <div className="climate-cards-grid">
               <ClimateCard
@@ -311,7 +309,7 @@ export default function DashboardOverview({
                 unit="°C"
                 icon="🌡️"
                 indicator="Nominal"
-                statusColor="#06b6d4"
+                statusColor="#0284c7"
               />
               <ClimateCard
                 label="Humidity"
@@ -319,31 +317,31 @@ export default function DashboardOverview({
                 unit="%"
                 icon="💧"
                 indicator="Moderate"
-                statusColor="#3b82f6"
+                statusColor="#2563eb"
               />
               <ClimateCard
-                label="Rainfall"
+                label="Rainfall (24h)"
                 value={weather.rainfall}
                 unit="mm"
                 icon="🌧️"
-                indicator="Precipitation Watch"
-                statusColor="#f59e0b"
+                indicator="Advisory Watch"
+                statusColor="#d97706"
               />
               <ClimateCard
                 label="Wind Speed"
                 value={weather.wind_speed}
                 unit="km/h"
                 icon="💨"
-                indicator="Gentle Breeze"
-                statusColor="#10b981"
+                indicator="Moderate Breeze"
+                statusColor="#059669"
               />
               <ClimateCard
-                label="Atmospheric Pressure"
+                label="Pressure"
                 value={weather.pressure || 1012.3}
                 unit="hPa"
                 icon="🧭"
-                indicator="Stable"
-                statusColor="#8b5cf6"
+                indicator="Standard"
+                statusColor="#7c3aed"
               />
               <ClimateCard
                 label="Air Quality Index"
@@ -351,17 +349,17 @@ export default function DashboardOverview({
                 unit="AQI"
                 icon="🏭"
                 indicator={aqi.aqi > 150 ? 'Unhealthy' : 'Moderate'}
-                statusColor={aqi.aqi > 150 ? '#ef4444' : '#f59e0b'}
+                statusColor={aqi.aqi > 150 ? '#dc2626' : '#d97706'}
                 subtext={`PM2.5: ${aqi.pm25 || 78.4} µg/m³ • PM10: ${aqi.pm10 || 142.1} µg/m³`}
               />
             </div>
           </section>
 
-          {/* SECTION C: CLIMATE RISK OVERVIEW */}
+          {/* MULTI-HAZARD RISK OVERVIEW */}
           <section className="dashboard-section">
             <SectionHeader
-              title="Multi-Hazard Threat Overview"
-              subtitle="Multi-hazard risk evaluation breakdown across key environmental threat vectors."
+              title="Hazard Risk Overview"
+              subtitle="Evaluation across monitored climate threat vectors."
               badge={isLiveBackend ? 'Live Aggregation' : 'Development Baseline'}
             />
             <div className="risk-cards-grid">
@@ -404,14 +402,14 @@ export default function DashboardOverview({
         <div className="workspace-block fade-in" id="predictions">
           <section className="dashboard-section">
             <SectionHeader
-              title="AI / ML Hazard Predictions"
-              subtitle="Multi-hazard inference served from Member 2's prediction pipelines."
-              badge={isLiveBackend ? 'Live API Feed (/predictions)' : 'Model Integration Ready'}
+              title="Climate Hazard Predictions"
+              subtitle="Inference models predicting hazards from environmental features."
+              badge={isLiveBackend ? 'Live API (/predictions)' : 'Model Integration Ready'}
             />
             <div className="model-integration-notice-bar">
               <span className="notice-icon">⚙️</span>
               <div className="notice-text">
-                <strong>Model Interface Architecture:</strong> Predictions currently reflect calibrated baseline interfaces (<code>xgboost_flood_baseline</code>, <code>random_forest_drought_baseline</code>, <code>lstm_temperature_baseline</code>, <code>ensemble_aqi_baseline</code>). Ready for trained weights.
+                <strong>Model Interface Architecture:</strong> Predictions currently reflect calibrated baseline interfaces (<code>xgboost_flood_baseline</code>, <code>random_forest_drought_baseline</code>, <code>lstm_temperature_baseline</code>, <code>ensemble_aqi_baseline</code>). Ready for Member 2's trained weights.
               </div>
             </div>
             <div className="predictions-grid">
@@ -445,8 +443,8 @@ export default function DashboardOverview({
         <div className="workspace-block fade-in" id="risk-map">
           <section className="dashboard-section">
             <SectionHeader
-              title="Spatial Risk & GIS Mapping"
-              subtitle="Geospatial monitoring zones and GeoJSON risk layer integration."
+              title="Spatial Risk &amp; GIS Mapping"
+              subtitle="Regional monitoring zones and GeoJSON risk layer integration."
               badge={isLiveBackend ? 'Live GeoJSON (/map/risk)' : 'GIS Integration Layer'}
             />
             <RiskMap mapZones={mapZones} isLive={isLiveBackend} />
@@ -459,8 +457,8 @@ export default function DashboardOverview({
         <div className="workspace-block fade-in" id="alerts">
           <section className="dashboard-section">
             <SectionHeader
-              title="Early Warning Alerts & Advisories"
-              subtitle="Actionable emergency notifications triggered by elevated prediction risk scores."
+              title="Early Warning Alerts &amp; Advisories"
+              subtitle="Notifications automatically generated from elevated hazard predictions."
               badge={isLiveBackend ? `${alerts.length} Live Alerts (/alerts)` : `${alerts.length} Demo Advisories`}
             />
             <div className="alerts-list">

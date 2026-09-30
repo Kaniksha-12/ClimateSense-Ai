@@ -38,7 +38,6 @@ export default function RiskCard({ hazard, riskLevel, riskScore, indicator, icon
           style={{
             width: `${Math.min(100, Math.max(0, riskScore))}%`,
             backgroundColor: levelMeta.color,
-            boxShadow: `0 0 10px ${levelMeta.color}60`,
           }}
         ></div>
       </div>

@@ -59,7 +59,7 @@ export default function App() {
     fetchGlobalData();
   }, [fetchGlobalData]);
 
-  const handleEnterCockpit = (workspace = 'overview') => {
+  const handleEnterDashboard = (workspace = 'overview') => {
     setActiveWorkspace(workspace);
     setViewMode('cockpit');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -72,7 +72,7 @@ export default function App() {
 
   return (
     <div className="app-container">
-      {/* 1. SHORT INITIALIZATION BOOT SEQUENCE */}
+      {/* System Initialization Modal */}
       {!hasBooted && (
         <BootSequence
           onComplete={() => {
@@ -86,7 +86,7 @@ export default function App() {
         isLiveBackend={isLiveBackend}
         viewMode={viewMode}
         onNavigate={(mode) => {
-          if (mode === 'cockpit') handleEnterCockpit();
+          if (mode === 'cockpit') handleEnterDashboard();
           else handleReturnToLanding();
         }}
         activeWorkspace={activeWorkspace}
@@ -96,10 +96,10 @@ export default function App() {
         }}
       />
 
-      {/* Layer 1: Cinematic Landing Experience */}
+      {/* View 1: Project Overview & Storytelling */}
       {viewMode === 'landing' ? (
         <LandingPage
-          onEnterApp={() => handleEnterCockpit('overview')}
+          onEnterApp={() => handleEnterDashboard('overview')}
           isLiveBackend={isLiveBackend}
           weather={weather}
           aqi={aqi}
@@ -109,7 +109,7 @@ export default function App() {
           alerts={alerts}
         />
       ) : (
-        /* Layer 2: Functional Climate Intelligence Cockpit */
+        /* View 2: Climate Risk Dashboard */
         <DashboardOverview
           onStatusChange={setIsLiveBackend}
           onBackToLanding={handleReturnToLanding}
@@ -122,10 +122,10 @@ export default function App() {
         <div className="footer-content">
           <div className="footer-left">
             <p>
-              <strong>ClimateSense AI</strong> &copy; 2026 — AI-Powered Climate Intelligence &amp; Early Warning System
+              <strong>ClimateSense AI</strong> &copy; 2026 — Climate Risk Monitoring &amp; Early Warning System
             </p>
             <p className="footer-subtext">
-              Member 4 Architecture • Member 1 (Data) • Member 2 (ML) • Member 3 (GIS) Integration Ready
+              Student Engineering Team • Member 1 (Data) • Member 2 (ML) • Member 3 (GIS) • Member 4 (Architecture &amp; Dashboard)
             </p>
           </div>
           <div className="footer-right">
@@ -135,9 +135,9 @@ export default function App() {
               onClick={() => {
                 setHasBooted(false);
               }}
-              title="Re-run System Initialization Sequence"
+              title="Show system initialization checklist again"
             >
-              ↻ Re-run Boot Sequence
+              System Check
             </button>
           </div>
         </div>
