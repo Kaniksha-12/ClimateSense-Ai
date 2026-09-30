@@ -1,0 +1,417 @@
+{
+  "best_model": "Tuned RandomForest",
+  "selection_metric": "Mean CV F1, then mean CV recall, then mean CV precision",
+  "final_test_used_for_model_selection": false,
+  "target": "flood_risk",
+  "data_notice": "DEMO ONLY \u2014 NOT REAL CLIMATE PERFORMANCE",
+  "classes": [
+    "0",
+    "1"
+  ],
+  "features": [
+    "rainfall",
+    "temperature",
+    "humidity",
+    "pressure",
+    "wind_speed"
+  ],
+  "dataset_profile": {
+    "development_shape": [
+      192,
+      6
+    ],
+    "final_test_shape": [
+      48,
+      6
+    ],
+    "original_shape": [
+      240,
+      6
+    ],
+    "feature_columns": [
+      "rainfall",
+      "temperature",
+      "humidity",
+      "pressure",
+      "wind_speed"
+    ],
+    "feature_dtypes": {
+      "rainfall": "float64",
+      "temperature": "float64",
+      "humidity": "float64",
+      "pressure": "float64",
+      "wind_speed": "float64"
+    },
+    "missing_values_in_original": {
+      "rainfall": 0,
+      "temperature": 0,
+      "humidity": 0,
+      "pressure": 0,
+      "wind_speed": 0,
+      "flood_risk": 0
+    },
+    "duplicate_rows_in_original": 0,
+    "outlier_counts_iqr_development_features": {
+      "rainfall": 2,
+      "temperature": 5,
+      "humidity": 0,
+      "pressure": 2,
+      "wind_speed": 2
+    },
+    "highly_correlated_feature_pairs_abs_ge_0_85": [],
+    "numeric_feature_target_correlations": {
+      "rainfall": 0.1197406348445722,
+      "temperature": -0.007689180912011445,
+      "humidity": 0.24687151443286776,
+      "pressure": -0.0027473207313285287,
+      "wind_speed": 0.08191073401502669
+    },
+    "possible_leakage_feature_names": [],
+    "temporal_column": null,
+    "observation_type": "independent observations",
+    "split_strategy": "stratified random",
+    "development_class_distribution": {
+      "0": {
+        "count": 94,
+        "percent": 48.958333333333336
+      },
+      "1": {
+        "count": 98,
+        "percent": 51.041666666666664
+      }
+    },
+    "final_test_class_distribution": {
+      "0": {
+        "count": 23,
+        "percent": 47.916666666666664
+      },
+      "1": {
+        "count": 25,
+        "percent": 52.083333333333336
+      }
+    }
+  },
+  "class_imbalance_strategy": "Target is near balanced; no resampling used. Random Forest compares class weights; XGBoost computes balanced weights within each fit fold.",
+  "cross_validation": {
+    "Baseline RandomForest": {
+      "accuracy": {
+        "mean": 0.5364583333333334,
+        "std": 0.054873196629441345,
+        "fold_scores": [
+          0.53125,
+          0.484375,
+          0.59375
+        ]
+      },
+      "precision": {
+        "mean": 0.5437500000000001,
+        "std": 0.0511584548242028,
+        "fold_scores": [
+          0.53125,
+          0.5,
+          0.6
+        ]
+      },
+      "recall": {
+        "mean": 0.5407196969696969,
+        "std": 0.0912782514098554,
+        "fold_scores": [
+          0.53125,
+          0.45454545454545453,
+          0.6363636363636364
+        ]
+      },
+      "f1": {
+        "mean": 0.5416958450046686,
+        "std": 0.07130447356899584,
+        "fold_scores": [
+          0.53125,
+          0.47619047619047616,
+          0.6176470588235294
+        ]
+      },
+      "roc_auc": {
+        "mean": 0.5809579540363311,
+        "std": 0.0662390204518105,
+        "fold_scores": [
+          0.5400390625,
+          0.5454545454545454,
+          0.6573802541544478
+        ]
+      },
+      "pr_auc": {
+        "mean": 0.6036797104865657,
+        "std": 0.06340862988798762,
+        "fold_scores": [
+          0.5776995634717432,
+          0.5573871700579504,
+          0.6759523979300033
+        ]
+      }
+    },
+    "Baseline XGBoost": {
+      "accuracy": {
+        "mean": 0.53125,
+        "std": 0.05633673867912483,
+        "fold_scores": [
+          0.515625,
+          0.484375,
+          0.59375
+        ]
+      },
+      "precision": {
+        "mean": 0.5459770114942528,
+        "std": 0.06527480857241694,
+        "fold_scores": [
+          0.5172413793103449,
+          0.5,
+          0.6206896551724138
+        ]
+      },
+      "recall": {
+        "mean": 0.4996843434343434,
+        "std": 0.040447173551829314,
+        "fold_scores": [
+          0.46875,
+          0.48484848484848486,
+          0.5454545454545454
+        ]
+      },
+      "f1": {
+        "mean": 0.5215853774288465,
+        "std": 0.0511478949771934,
+        "fold_scores": [
+          0.4918032786885246,
+          0.49230769230769234,
+          0.5806451612903226
+        ]
+      },
+      "roc_auc": {
+        "mean": 0.5661259138766699,
+        "std": 0.049690009414893294,
+        "fold_scores": [
+          0.5595703125,
+          0.520039100684262,
+          0.6187683284457478
+        ]
+      },
+      "pr_auc": {
+        "mean": 0.6242785881473941,
+        "std": 0.06812042393253562,
+        "fold_scores": [
+          0.6209817821363626,
+          0.5578664265112425,
+          0.6939875557945774
+        ]
+      }
+    },
+    "Tuned RandomForest": {
+      "accuracy": {
+        "mean": 0.609375,
+        "std": 0.08365822085525526,
+        "fold_scores": []
+      },
+      "precision": {
+        "mean": 0.625089605734767,
+        "std": 0.08698977157948327,
+        "fold_scores": []
+      },
+      "recall": {
+        "mean": 0.5814393939393939,
+        "std": 0.0876275361593479,
+        "fold_scores": []
+      },
+      "f1": {
+        "mean": 0.6024438897422768,
+        "std": 0.08743367212004209,
+        "fold_scores": []
+      },
+      "roc_auc": {
+        "mean": 0.6110958374063212,
+        "std": 0.09252278055432696,
+        "fold_scores": []
+      },
+      "pr_auc": {
+        "mean": 0.6491700082752735,
+        "std": 0.10462202043395481,
+        "fold_scores": []
+      }
+    },
+    "Tuned XGBoost": {
+      "accuracy": {
+        "mean": 0.5677083333333334,
+        "std": 0.09575404328567831,
+        "fold_scores": []
+      },
+      "precision": {
+        "mean": 0.5951633986928104,
+        "std": 0.12247870749817083,
+        "fold_scores": []
+      },
+      "recall": {
+        "mean": 0.53125,
+        "std": 0.07602147847665523,
+        "fold_scores": []
+      },
+      "f1": {
+        "mean": 0.5584581446650413,
+        "std": 0.0868946565428368,
+        "fold_scores": []
+      },
+      "roc_auc": {
+        "mean": 0.618899745947377,
+        "std": 0.0864417658995548,
+        "fold_scores": []
+      },
+      "pr_auc": {
+        "mean": 0.6780994260876773,
+        "std": 0.08227682459045396,
+        "fold_scores": []
+      }
+    }
+  },
+  "tuning": {
+    "cv_folds": 3,
+    "iterations_per_model": 4,
+    "selected_configuration": {
+      "classifier__n_estimators": 100,
+      "classifier__min_samples_split": 2,
+      "classifier__min_samples_leaf": 1,
+      "classifier__max_features": "sqrt",
+      "classifier__max_depth": 4,
+      "classifier__class_weight": "balanced"
+    }
+  },
+  "model_comparison_final_test": {
+    "Baseline RandomForest": {
+      "accuracy": 0.6458333333333334,
+      "precision": 0.7,
+      "recall": 0.56,
+      "f1": 0.6222222222222222,
+      "roc_auc": 0.6991304347826086,
+      "pr_auc": 0.7318495818132041,
+      "confusion_matrix": [
+        [
+          17,
+          6
+        ],
+        [
+          11,
+          14
+        ]
+      ]
+    },
+    "Baseline XGBoost": {
+      "accuracy": 0.625,
+      "precision": 0.6666666666666666,
+      "recall": 0.56,
+      "f1": 0.6086956521739131,
+      "roc_auc": 0.7095652173913044,
+      "pr_auc": 0.7637386217913142,
+      "confusion_matrix": [
+        [
+          16,
+          7
+        ],
+        [
+          11,
+          14
+        ]
+      ]
+    },
+    "Tuned RandomForest": {
+      "accuracy": 0.5833333333333334,
+      "precision": 0.6190476190476191,
+      "recall": 0.52,
+      "f1": 0.5652173913043478,
+      "roc_auc": 0.6382608695652174,
+      "pr_auc": 0.7095560766791071,
+      "confusion_matrix": [
+        [
+          15,
+          8
+        ],
+        [
+          12,
+          13
+        ]
+      ]
+    },
+    "Tuned XGBoost": {
+      "accuracy": 0.6666666666666666,
+      "precision": 0.7142857142857143,
+      "recall": 0.6,
+      "f1": 0.6521739130434783,
+      "roc_auc": 0.693913043478261,
+      "pr_auc": 0.7295887653384234,
+      "confusion_matrix": [
+        [
+          17,
+          6
+        ],
+        [
+          10,
+          15
+        ]
+      ]
+    },
+    "Best Model": {
+      "accuracy": 0.5833333333333334,
+      "precision": 0.6190476190476191,
+      "recall": 0.52,
+      "f1": 0.5652173913043478,
+      "roc_auc": 0.6382608695652174,
+      "pr_auc": 0.7095560766791071,
+      "confusion_matrix": [
+        [
+          15,
+          8
+        ],
+        [
+          12,
+          13
+        ]
+      ]
+    }
+  },
+  "final_test_metrics": {
+    "accuracy": 0.5833333333333334,
+    "precision": 0.6190476190476191,
+    "recall": 0.52,
+    "f1": 0.5652173913043478,
+    "roc_auc": 0.6382608695652174,
+    "pr_auc": 0.7095560766791071,
+    "confusion_matrix": [
+      [
+        15,
+        8
+      ],
+      [
+        12,
+        13
+      ]
+    ]
+  },
+  "feature_importance": [
+    {
+      "feature": "numeric__humidity",
+      "importance": 0.28381631256185935
+    },
+    {
+      "feature": "numeric__wind_speed",
+      "importance": 0.23462732323400692
+    },
+    {
+      "feature": "numeric__rainfall",
+      "importance": 0.1819105747117684
+    },
+    {
+      "feature": "numeric__temperature",
+      "importance": 0.1616274621233633
+    },
+    {
+      "feature": "numeric__pressure",
+      "importance": 0.13801832736900208
+    }
+  ]
+}
