@@ -1,0 +1,55 @@
+{
+  "best_model": "RandomForest",
+  "selection_metric": "F1, then recall, then precision",
+  "target": "flood_risk",
+  "data_notice": "DEMO ONLY \u2014 NOT REAL CLIMATE PERFORMANCE",
+  "classes": [
+    "0",
+    "1"
+  ],
+  "features": [
+    "rainfall",
+    "temperature",
+    "humidity",
+    "pressure",
+    "wind_speed",
+    "precipitation_total"
+  ],
+  "data_rows": 240,
+  "evaluations": {
+    "RandomForest": {
+      "accuracy": 0.6458333333333334,
+      "precision": 0.7,
+      "recall": 0.56,
+      "f1": 0.6222222222222222,
+      "roc_auc": 0.6991304347826086,
+      "confusion_matrix": [
+        [
+          17,
+          6
+        ],
+        [
+          11,
+          14
+        ]
+      ]
+    },
+    "XGBoost": {
+      "accuracy": 0.625,
+      "precision": 0.6666666666666666,
+      "recall": 0.56,
+      "f1": 0.6086956521739131,
+      "roc_auc": 0.7095652173913044,
+      "confusion_matrix": [
+        [
+          16,
+          7
+        ],
+        [
+          11,
+          14
+        ]
+      ]
+    }
+  }
+}
