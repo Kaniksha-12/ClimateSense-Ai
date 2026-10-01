@@ -10,11 +10,37 @@ env/
 .env
 .env.*
 !.env.example
+*.env
+*.pem
+*.key
+*.p12
+*.pfx
+*.p8
+*.ppk
+*.asc
+*credential*
+*secret*
+*token*
+credentials.json
+secrets.json
+*_credentials.json
+*_service_account.json
+.netrc
+id_rsa*
+id_ed25519*
+.aws/
 
 # Testing / cache
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Regenerable climate-data caches
+/data/real/era5/
+/data/real/chirps/
+
+# Large generated model artifacts must be checked for size before staging.
+# Git ignore rules cannot filter files by byte size.
 
 # Node
 node_modules/
