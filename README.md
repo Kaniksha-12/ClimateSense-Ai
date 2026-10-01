@@ -103,3 +103,19 @@ No credentials or API keys are required or included. Environment files and local
 ## Current limitations
 
 Conditions and risks remain static examples. Prediction storage accepts validated records but does not call an ML model. GIS is unavailable until Member 3 supplies output. The local schema initializer is not a migration tool; production PostgreSQL migrations and operational monitoring remain future work.
+
+## Data Preprocessing
+
+The data preprocessing pipeline provides the initial climate-data foundation for the project.
+
+- Raw climate data is stored under `data/raw/`
+- Processed datasets are stored under `data/processed/`
+- Dataset metadata and schemas are available under `data/metadata/`
+- Data quality and analysis reports are available under `reports/`
+
+The initial MVP uses validated climate observations and does not fabricate flood-event labels when authoritative target data is unavailable.
+
+The preprocessing pipeline can be reproduced with:
+
+```bash
+python -m src.prepare_data

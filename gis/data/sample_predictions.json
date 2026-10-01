@@ -1,0 +1,74 @@
+[
+  {
+    "location": "Mumbai, Maharashtra",
+    "latitude": 19.0760,
+    "longitude": 72.8777,
+    "risk_type": "flood",
+    "risk_score": 0.84,
+    "risk_level": "HIGH"
+  },
+  {
+    "location": "Chennai, Tamil Nadu",
+    "latitude": 13.0827,
+    "longitude": 80.2707,
+    "risk_type": "flood",
+    "risk_score": 0.63,
+    "risk_level": "MEDIUM"
+  },
+  {
+    "location": "Jaipur, Rajasthan",
+    "latitude": 26.9124,
+    "longitude": 75.7873,
+    "risk_type": "drought",
+    "risk_score": 0.76,
+    "risk_level": "HIGH"
+  },
+  {
+    "location": "Bengaluru, Karnataka",
+    "latitude": 12.9716,
+    "longitude": 77.5946,
+    "risk_type": "heatwave",
+    "risk_score": 0.48,
+    "risk_level": "MEDIUM"
+  },
+  {
+    "location": "Delhi, NCT of Delhi",
+    "latitude": 28.6139,
+    "longitude": 77.2090,
+    "risk_type": "air_quality",
+    "risk_score": 0.91,
+    "risk_level": "HIGH"
+  },
+  {
+    "location": "Ahmedabad, Gujarat",
+    "latitude": 23.0225,
+    "longitude": 72.5714,
+    "risk_type": "heatwave",
+    "risk_score": 0.72,
+    "risk_level": "HIGH"
+  },
+  {
+    "location": "Kolkata, West Bengal",
+    "latitude": 22.5726,
+    "longitude": 88.3639,
+    "risk_type": "flood",
+    "risk_score": 0.57,
+    "risk_level": "MEDIUM"
+  },
+  {
+    "location": "Hyderabad, Telangana",
+    "latitude": 17.3850,
+    "longitude": 78.4867,
+    "risk_type": "drought",
+    "risk_score": 0.32,
+    "risk_level": "LOW"
+  },
+  {
+    "location": "Guwahati, Assam",
+    "latitude": 26.1445,
+    "longitude": 91.7362,
+    "risk_type": "flood",
+    "risk_score": 0.68,
+    "risk_level": "MEDIUM"
+  }
+]

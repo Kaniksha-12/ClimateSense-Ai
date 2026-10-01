@@ -1,0 +1,30 @@
+{
+  "features": [
+    "rainfall_mm",
+    "temperature_c",
+    "relative_humidity_pct",
+    "wind_speed_m_s",
+    "surface_pressure_kpa",
+    "previous_day_rainfall_mm",
+    "rain_3day_mm",
+    "rain_7day_mm",
+    "rainfall_anomaly_mm"
+  ],
+  "target": null,
+  "identifiers": [
+    "date",
+    "latitude",
+    "longitude",
+    "location"
+  ],
+  "date_range": {
+    "start": "2024-01-01 00:00:00",
+    "end": "2024-12-31 00:00:00"
+  },
+  "geographic_coverage": {
+    "latitude_min": 28.6139,
+    "latitude_max": 28.6139,
+    "longitude_min": 77.209,
+    "longitude_max": 77.209
+  }
+}
