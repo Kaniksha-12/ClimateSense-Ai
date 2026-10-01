@@ -15,6 +15,9 @@ env/
 .pytest_cache/
 .coverage
 htmlcov/
+backend/data/*.db
+backend/data/*.sqlite
+backend/data/*.sqlite3
 
 # Node
 node_modules/
