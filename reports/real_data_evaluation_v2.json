@@ -1,0 +1,511 @@
+{
+  "label": "REAL DATA - ERA5 reanalysis rainfall",
+  "data_notice": "IFI-Impacts binary event labels with ERA5 reanalysis rainfall; rainfall is reanalysis, not observed station data.",
+  "dataset": {
+    "path": "/workspaces/ClimateSense-Ai/data/processed/real_flood_dataset_v2.csv",
+    "rows": 12316,
+    "class_counts": {
+      "0": 12033,
+      "1": 283
+    },
+    "class_balance": {
+      "0": 0.9770217603117896,
+      "1": 0.02297823968821046
+    },
+    "majority_class": 0,
+    "majority_class_baseline_accuracy": 0.9499761791329204,
+    "rainfall_source": "data/real/era5/three_point/district_daily_rainfall.csv",
+    "districts": [
+      {
+        "lgd_code": 482,
+        "district": "Mumbai"
+      },
+      {
+        "lgd_code": 484,
+        "district": "Nagpur"
+      },
+      {
+        "lgd_code": 490,
+        "district": "Pune"
+      },
+      {
+        "lgd_code": 497,
+        "district": "Thane"
+      },
+      {
+        "lgd_code": 499,
+        "district": "Washim"
+      }
+    ],
+    "dropped_events": {
+      "not_single_state_maharashtra": 5864,
+      "district_lgd_token_count_mismatch": 7,
+      "end_before_start": 1,
+      "missing_or_invalid_start_date": 1,
+      "ifi_event_rows_total": 6876,
+      "valid_selected_district_event_associations": 625,
+      "unique_positive_district_start_dates": 283
+    }
+  },
+  "split": {
+    "train_years": [
+      2000,
+      2018
+    ],
+    "test_years": [
+      2019,
+      2023
+    ],
+    "training_rows": 10217,
+    "test_rows": 2099,
+    "training_class_counts": {
+      "0": 10039,
+      "1": 178
+    },
+    "test_class_counts": {
+      "0": 1994,
+      "1": 105
+    },
+    "row_overlap": 0,
+    "event_overlap": 0,
+    "test_used_for_tuning_or_threshold": false
+  },
+  "feature_columns": [
+    "rainfall_1d_total_mm",
+    "rainfall_1d_max_daily_mm",
+    "rainfall_3d_total_mm",
+    "rainfall_3d_max_daily_mm",
+    "rainfall_7d_total_mm",
+    "rainfall_7d_max_daily_mm",
+    "rainfall_14d_total_mm",
+    "rainfall_14d_max_daily_mm",
+    "rainfall_30d_total_mm",
+    "rainfall_30d_max_daily_mm",
+    "days_since_rain_gt20mm",
+    "rainfall_anomaly_vs_training_monthly_mean_mm",
+    "month",
+    "district"
+  ],
+  "features_are_one_hot_district": true,
+  "target_in_features": false,
+  "model_selection": {
+    "selected_model": "RandomForest",
+    "candidates": [
+      "LogisticRegression",
+      "RandomForest",
+      "XGBoost"
+    ],
+    "selection_metric": "GroupKFold mean PR-AUC, with ROC-AUC as tie-breaker",
+    "randomized_search_iterations_per_model": 15,
+    "best_parameters": {
+      "LogisticRegression": {
+        "classifier__tol": 0.0001,
+        "classifier__class_weight": "balanced",
+        "classifier__C": 3.0
+      },
+      "RandomForest": {
+        "classifier__n_estimators": 250,
+        "classifier__min_samples_split": 2,
+        "classifier__min_samples_leaf": 2,
+        "classifier__max_features": "sqrt",
+        "classifier__max_depth": 4,
+        "classifier__class_weight": "balanced"
+      },
+      "XGBoost": {
+        "classifier__subsample": 0.9,
+        "classifier__reg_lambda": 5.0,
+        "classifier__reg_alpha": 0.0,
+        "classifier__n_estimators": 320,
+        "classifier__min_child_weight": 1.0,
+        "classifier__max_depth": 3,
+        "classifier__learning_rate": 0.05,
+        "classifier__colsample_bytree": 0.9
+      }
+    },
+    "xgboost_early_stopping": "Each fold's chronological final 15% is the early-stopping evaluation tail; selected tree count is frozen before full training-year refit.",
+    "class_imbalance": "balanced Logistic Regression and Random Forest; scale_pos_weight for XGBoost"
+  },
+  "cv_metrics": {
+    "LogisticRegression": {
+      "roc_auc": {
+        "mean": 0.7775108124923674,
+        "std": 0.04897475849065959,
+        "fold_scores": [
+          0.8661510833043679,
+          0.7730775924222459,
+          0.7501904761904762,
+          0.7194749403341288,
+          0.7786599702106183
+        ]
+      },
+      "pr_auc": {
+        "mean": 0.10727871700010909,
+        "std": 0.037380510998662735,
+        "fold_scores": [
+          0.17220133155026882,
+          0.11505147774207125,
+          0.0728820879458471,
+          0.06819662892519743,
+          0.10806205883716083
+        ]
+      }
+    },
+    "RandomForest": {
+      "roc_auc": {
+        "mean": 0.7594016278559579,
+        "std": 0.043584979185925875,
+        "fold_scores": [
+          0.8249188969991889,
+          0.7624369142033165,
+          0.73675,
+          0.6938484486873508,
+          0.7790538793899331
+        ]
+      },
+      "pr_auc": {
+        "mean": 0.11588235020271323,
+        "std": 0.038170363543321054,
+        "fold_scores": [
+          0.18076636051711756,
+          0.1361303860751699,
+          0.09514722549302886,
+          0.07469672168502303,
+          0.09267105724322676
+        ]
+      }
+    },
+    "XGBoost": {
+      "roc_auc": {
+        "mean": 0.7623169924491812,
+        "std": 0.052457492871727976,
+        "fold_scores": [
+          0.8443691345151199,
+          0.7534184421848196,
+          0.7236309523809523,
+          0.6958054892601433,
+          0.7943609439048709
+        ]
+      },
+      "pr_auc": {
+        "mean": 0.11247666217455847,
+        "std": 0.06018656792590807,
+        "fold_scores": [
+          0.2318684777691273,
+          0.07814949025217983,
+          0.07079897172495593,
+          0.09003796943311743,
+          0.09152840169341188
+        ]
+      }
+    }
+  },
+  "threshold_selection": {
+    "threshold": 0.3352925985872756,
+    "oof_precision": 0.031120783460282915,
+    "oof_recall": 0.8033707865168539,
+    "oof_f1": 0.05992038550178085,
+    "recall_target": 0.8,
+    "minimum_precision": 0.05,
+    "precision_constraint_met": false,
+    "selection_policy": "recall_target_precision_constraint_unmet",
+    "oof_rows": 10217,
+    "oof_method": "five-fold GroupKFold by calendar year, training years only",
+    "training_prevalence": 0.01742194381912499
+  },
+  "test_results": {
+    "selected_model": {
+      "accuracy": 0.5269175797999047,
+      "balanced_accuracy": 0.6698022639346611,
+      "precision": 0.08192090395480225,
+      "recall": 0.8285714285714286,
+      "f1": 0.14910025706940874,
+      "roc_auc": 0.7446530066389644,
+      "pr_auc": 0.15763307530962803,
+      "confusion_matrix": [
+        [
+          1019,
+          975
+        ],
+        [
+          18,
+          87
+        ]
+      ]
+    },
+    "logistic_regression_baseline": {
+      "accuracy": 0.6893758932825155,
+      "balanced_accuracy": 0.6154630558341692,
+      "precision": 0.08497723823975721,
+      "recall": 0.5333333333333333,
+      "f1": 0.14659685863874344,
+      "roc_auc": 0.6653532024645364,
+      "pr_auc": 0.1198904694534524,
+      "confusion_matrix": [
+        [
+          1391,
+          603
+        ],
+        [
+          49,
+          56
+        ]
+      ]
+    },
+    "majority_class_baseline": {
+      "accuracy": 0.9499761791329204,
+      "balanced_accuracy": 0.5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": 0.5,
+      "pr_auc": 0.050023820867079564,
+      "confusion_matrix": [
+        [
+          1994,
+          0
+        ],
+        [
+          105,
+          0
+        ]
+      ]
+    }
+  },
+  "majority_baseline": {
+    "class_from_training_only": 0,
+    "metrics": {
+      "accuracy": 0.9499761791329204,
+      "balanced_accuracy": 0.5,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "roc_auc": 0.5,
+      "pr_auc": 0.050023820867079564,
+      "confusion_matrix": [
+        [
+          1994,
+          0
+        ],
+        [
+          105,
+          0
+        ]
+      ]
+    }
+  },
+  "bootstrap_95_ci": {
+    "method": "paired nonparametric bootstrap of held-out test rows; single-class resamples skipped",
+    "requested_iterations": 2000,
+    "valid_iterations": 2000,
+    "confidence_level": 0.95,
+    "test_roc_auc": [
+      0.69795959280377,
+      0.7933144725374854
+    ],
+    "test_recall": [
+      0.7545342771982116,
+      0.8985553109521188
+    ],
+    "roc_auc_difference_vs_majority_baseline": [
+      0.19795959280376993,
+      0.29331447253748544
+    ]
+  },
+  "reliability": {
+    "brier_score": 0.18301820833753482,
+    "calibration_table": [
+      {
+        "lower": 0.1,
+        "upper": 0.2,
+        "count": 319,
+        "mean_predicted_probability": 0.15607982300331133,
+        "observed_positive_rate": 0.01567398119122257
+      },
+      {
+        "lower": 0.2,
+        "upper": 0.30000000000000004,
+        "count": 519,
+        "mean_predicted_probability": 0.25817845608539847,
+        "observed_positive_rate": 0.01348747591522158
+      },
+      {
+        "lower": 0.30000000000000004,
+        "upper": 0.4,
+        "count": 390,
+        "mean_predicted_probability": 0.3405373472639014,
+        "observed_positive_rate": 0.038461538461538464
+      },
+      {
+        "lower": 0.4,
+        "upper": 0.5,
+        "count": 261,
+        "mean_predicted_probability": 0.44509620250218596,
+        "observed_positive_rate": 0.038314176245210725
+      },
+      {
+        "lower": 0.5,
+        "upper": 0.6000000000000001,
+        "count": 292,
+        "mean_predicted_probability": 0.5522232190888746,
+        "observed_positive_rate": 0.07191780821917808
+      },
+      {
+        "lower": 0.6000000000000001,
+        "upper": 0.7000000000000001,
+        "count": 176,
+        "mean_predicted_probability": 0.6474512427772218,
+        "observed_positive_rate": 0.10227272727272728
+      },
+      {
+        "lower": 0.7000000000000001,
+        "upper": 0.8,
+        "count": 58,
+        "mean_predicted_probability": 0.7408400154506968,
+        "observed_positive_rate": 0.20689655172413793
+      },
+      {
+        "lower": 0.8,
+        "upper": 0.9,
+        "count": 84,
+        "mean_predicted_probability": 0.8582408388814872,
+        "observed_positive_rate": 0.20238095238095238
+      }
+    ]
+  },
+  "per_district_recall": [
+    {
+      "lgd_code": "482",
+      "district": "Mumbai",
+      "positive_support": 14,
+      "recall": 0.9285714285714286
+    },
+    {
+      "lgd_code": "484",
+      "district": "Nagpur",
+      "positive_support": 29,
+      "recall": 0.6896551724137931
+    },
+    {
+      "lgd_code": "490",
+      "district": "Pune",
+      "positive_support": 13,
+      "recall": 0.9230769230769231
+    },
+    {
+      "lgd_code": "497",
+      "district": "Thane",
+      "positive_support": 21,
+      "recall": 0.9523809523809523
+    },
+    {
+      "lgd_code": "499",
+      "district": "Washim",
+      "positive_support": 28,
+      "recall": 0.7857142857142857
+    }
+  ],
+  "top_10_feature_importances": [
+    {
+      "feature": "numeric__rainfall_anomaly_vs_training_monthly_mean_mm",
+      "importance": 0.16499316780055573
+    },
+    {
+      "feature": "numeric__rainfall_1d_total_mm",
+      "importance": 0.14834609799471166
+    },
+    {
+      "feature": "numeric__rainfall_1d_max_daily_mm",
+      "importance": 0.13671354388566578
+    },
+    {
+      "feature": "numeric__rainfall_3d_max_daily_mm",
+      "importance": 0.08818839406251537
+    },
+    {
+      "feature": "numeric__days_since_rain_gt20mm",
+      "importance": 0.08066080833230237
+    },
+    {
+      "feature": "numeric__rainfall_3d_total_mm",
+      "importance": 0.07725782650925087
+    },
+    {
+      "feature": "numeric__rainfall_7d_max_daily_mm",
+      "importance": 0.06353866291875862
+    },
+    {
+      "feature": "numeric__rainfall_7d_total_mm",
+      "importance": 0.047889347232569504
+    },
+    {
+      "feature": "categorical__district_Pune (LGD 490)",
+      "importance": 0.03170495836146185
+    },
+    {
+      "feature": "numeric__rainfall_14d_max_daily_mm",
+      "importance": 0.03159266078602316
+    }
+  ],
+  "verdict": "The model's test ROC-AUC exceeds the majority baseline (0.5), with the paired 95% bootstrap interval for the AUC difference entirely above zero. The main weakness is low positive precision, so reaching the recall target produces many false alerts under the highly imbalanced all-negative-day sampling frame.",
+  "limitations": "IFI-Impacts records are not a complete flood-observation calendar; eligible non-event days can include unreported floods. ERA5 is reanalysis, not observed station rainfall. Results cover five Maharashtra districts and June-September only; they are not a national operational flood forecast.",
+  "bundle_metadata": {
+    "label": "REAL DATA - ERA5 reanalysis rainfall",
+    "dataset_path": "/workspaces/ClimateSense-Ai/data/processed/real_flood_dataset_v2.csv",
+    "training_rows": 10217,
+    "test_rows": 2099,
+    "feature_columns": [
+      "rainfall_1d_total_mm",
+      "rainfall_1d_max_daily_mm",
+      "rainfall_3d_total_mm",
+      "rainfall_3d_max_daily_mm",
+      "rainfall_7d_total_mm",
+      "rainfall_7d_max_daily_mm",
+      "rainfall_14d_total_mm",
+      "rainfall_14d_max_daily_mm",
+      "rainfall_30d_total_mm",
+      "rainfall_30d_max_daily_mm",
+      "days_since_rain_gt20mm",
+      "rainfall_anomaly_vs_training_monthly_mean_mm",
+      "month",
+      "district"
+    ],
+    "transformed_feature_columns": [
+      "numeric__rainfall_1d_total_mm",
+      "numeric__rainfall_1d_max_daily_mm",
+      "numeric__rainfall_3d_total_mm",
+      "numeric__rainfall_3d_max_daily_mm",
+      "numeric__rainfall_7d_total_mm",
+      "numeric__rainfall_7d_max_daily_mm",
+      "numeric__rainfall_14d_total_mm",
+      "numeric__rainfall_14d_max_daily_mm",
+      "numeric__rainfall_30d_total_mm",
+      "numeric__rainfall_30d_max_daily_mm",
+      "numeric__days_since_rain_gt20mm",
+      "numeric__rainfall_anomaly_vs_training_monthly_mean_mm",
+      "numeric__month",
+      "categorical__district_Mumbai (LGD 482)",
+      "categorical__district_Nagpur (LGD 484)",
+      "categorical__district_Pune (LGD 490)",
+      "categorical__district_Thane (LGD 497)",
+      "categorical__district_Washim (LGD 499)"
+    ],
+    "target": "flood_risk",
+    "decision_threshold": 0.3352925985872756,
+    "train_years": [
+      2000,
+      2018
+    ],
+    "test_years": [
+      2019,
+      2023
+    ],
+    "selected_model": "RandomForest",
+    "randomized_search_iterations_per_model": 15,
+    "cv": "GroupKFold(n_splits=5), grouped by calendar year; training years only",
+    "train_test_overlap": {
+      "row_overlap": 0,
+      "event_overlap": 0
+    },
+    "class_weights": "balanced Logistic Regression and Random Forest; scale_pos_weight for XGBoost"
+  }
+}
