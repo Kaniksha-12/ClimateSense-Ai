@@ -22,6 +22,7 @@ from src.config import (
 from src.data_analyzer import load_csv
 
 logger = logging.getLogger(__name__)
+DEMO_DATA_NOTICE = "DEMO ONLY — NOT REAL CLIMATE PERFORMANCE"
 
 CANONICAL_CLIMATE_FEATURES = ["rainfall", "temperature", "humidity", "pressure", "wind_speed"]
 FEATURE_ALIASES = {
@@ -206,7 +207,7 @@ def predict_risk(
 			"risk_score": score,
 			"probability": score,
 			"model": metadata["model_name"].removeprefix("Tuned "),
-			"data_notice": metadata.get("data_notice"),
+			"data_notice": metadata.get("data_notice") or DEMO_DATA_NOTICE,
 			"predicted_class": class_names[predicted_index],
 			"features": feature_values,
 		}
@@ -271,7 +272,7 @@ def analyze_uploaded_dataset(file_path: str | Path, model_path: str | Path = DEF
 		},
 		"output_csv": str(output_path),
 		"model": str(model_path),
-		"data_notice": model_bundle["metadata"].get("data_notice"),
+		"data_notice": model_bundle["metadata"].get("data_notice") or DEMO_DATA_NOTICE,
 	}
 	return analysis
 
