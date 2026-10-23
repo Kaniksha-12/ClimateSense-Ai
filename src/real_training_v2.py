@@ -31,6 +31,7 @@ from xgboost import XGBClassifier
 
 from scripts.build_real_dataset_v2 import IFI_PATH, prepare_event_labels
 from src.fetch_features import DISTRICT_NAMES
+from src.label_contract import IFI_SAME_DAY_SPEC_ID, validate_ifi_association_rows
 from src.preprocessing import build_preprocessor
 
 logger = logging.getLogger(__name__)
@@ -44,7 +45,8 @@ TRAIN_START_YEAR = 2000
 TRAIN_END_YEAR = 2018
 TEST_START_YEAR = 2019
 TEST_END_YEAR = 2023
-TARGET = "flood_risk"
+TARGET = "label_value"
+TARGET_SPEC_ID = IFI_SAME_DAY_SPEC_ID
 FEATURE_COLUMNS = [
 	"rainfall_1d_total_mm",
 	"rainfall_1d_max_daily_mm",
@@ -368,7 +370,7 @@ def _markdown_report(report: dict[str, Any]) -> str:
 	lines = [
 		"# REAL DATA - ERA5 reanalysis rainfall",
 		"",
-		"> IFI-Impacts event labels with ERA5 reanalysis rainfall; rainfall is not observed station data.",
+		"> IFI event-association target only; an inventory non-match is not evidence of no flooding. ERA5 is reanalysis, not observed station data.",
 		"",
 		"## Dataset and split",
 		"",
@@ -425,18 +427,34 @@ def train_real_model_v2(
 	frame = pd.read_csv(dataset_path, parse_dates=["date"])
 	ifi_events = pd.read_csv(IFI_PATH, dtype={"District_LGD_Codes": "string"})
 	_, _, dropped_events = prepare_event_labels(ifi_events)
+	label_eligibility = validate_ifi_association_rows(
+		frame.to_dict(orient="records"),
+		target_spec_id=TARGET_SPEC_ID,
+	)
 	required = {"date", "year", "lgd_code", "district", "event_ueis", TARGET, *FEATURE_COLUMNS}
 	if required - set(frame.columns):
 		raise ValueError(f"V2 dataset is missing columns: {sorted(required - set(frame.columns))}")
+	frame[TARGET] = label_eligibility.label_values
 	if set(frame[TARGET].dropna().unique()) != {0, 1}:
-		raise ValueError("Target must contain exactly binary classes 0 and 1.")
-	if frame[TARGET].isna().any() or frame[FEATURE_COLUMNS].isna().all(axis=None):
-		raise ValueError("Target or all feature values are missing.")
+		raise ValueError("Eligible IFI association target must contain exactly binary classes 0 and 1.")
+	if frame[FEATURE_COLUMNS].isna().all(axis=None):
+		raise ValueError("All feature values are missing.")
 	if frame.duplicated(["lgd_code", "date"]).any():
 		raise ValueError("V2 data has duplicate LGD district-days.")
+	frame["__label_training_eligible"] = label_eligibility.training_eligible
+	frame["__label_evaluation_eligible"] = label_eligibility.evaluation_eligible
 	frame = frame.sort_values(["date", "lgd_code"]).reset_index(drop=True)
-	training = frame[frame["year"].between(TRAIN_START_YEAR, TRAIN_END_YEAR)].reset_index(drop=True)
-	test = frame[frame["year"].between(TEST_START_YEAR, TEST_END_YEAR)].reset_index(drop=True)
+	training = frame[
+		frame["year"].between(TRAIN_START_YEAR, TRAIN_END_YEAR)
+		& frame["__label_training_eligible"]
+	].reset_index(drop=True)
+	test = frame[
+		frame["year"].between(TEST_START_YEAR, TEST_END_YEAR)
+		& frame["__label_evaluation_eligible"]
+	].reset_index(drop=True)
+	frame = frame.drop(columns=["__label_training_eligible", "__label_evaluation_eligible"])
+	training = training.drop(columns=["__label_training_eligible", "__label_evaluation_eligible"])
+	test = test.drop(columns=["__label_training_eligible", "__label_evaluation_eligible"])
 	if training.empty or test.empty:
 		raise ValueError("The fixed training and test year partitions must be non-empty.")
 	for name, partition in (("training", training), ("test", test)):
@@ -570,6 +588,13 @@ def train_real_model_v2(
 		"feature_columns": FEATURE_COLUMNS,
 		"transformed_feature_columns": [str(value) for value in final_model.named_steps["preprocessor"].get_feature_names_out()],
 		"target": TARGET,
+		"target_spec_id": TARGET_SPEC_ID,
+		"target_interpretation": "IFI event-start association only; a negative is a no-match in the declared inventory snapshot, not verified absence of flooding.",
+		"label_provenance": {
+			"inventory_snapshot_id": sorted(frame["label_inventory_snapshot_id"].unique().tolist()),
+			"matching_rule_id": sorted(frame["label_matching_rule_id"].unique().tolist()),
+			"matching_rule_version": sorted(frame["label_matching_rule_version"].unique().tolist()),
+		},
 		"decision_threshold": float(threshold),
 		"train_years": [TRAIN_START_YEAR, TRAIN_END_YEAR],
 		"test_years": [TEST_START_YEAR, TEST_END_YEAR],
@@ -581,7 +606,9 @@ def train_real_model_v2(
 	}
 	report = {
 		"label": "REAL DATA - ERA5 reanalysis rainfall",
-		"data_notice": "IFI-Impacts binary event labels with ERA5 reanalysis rainfall; rainfall is reanalysis, not observed station data.",
+		"target_spec_id": TARGET_SPEC_ID,
+		"target_interpretation": "IFI event-start association only; negatives mean no match in the declared inventory snapshot, not verified absence of flooding.",
+		"data_notice": "IFI event-association labels with ERA5 reanalysis rainfall; inventory non-matches are not flood-absence labels, and rainfall is not observed station data.",
 		"dataset": {
 			"path": str(dataset_path),
 			"rows": int(len(frame)),
