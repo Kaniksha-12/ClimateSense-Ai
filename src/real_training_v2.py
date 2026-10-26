@@ -25,7 +25,7 @@ from sklearn.metrics import (
 	recall_score,
 	roc_auc_score,
 )
-from sklearn.model_selection import GroupKFold, RandomizedSearchCV, cross_val_predict
+from sklearn.model_selection import RandomizedSearchCV
 from sklearn.pipeline import Pipeline
 from xgboost import XGBClassifier
 
@@ -33,6 +33,11 @@ from scripts.build_real_dataset_v2 import IFI_PATH, prepare_event_labels
 from src.fetch_features import DISTRICT_NAMES
 from src.label_contract import IFI_SAME_DAY_SPEC_ID, validate_ifi_association_rows
 from src.preprocessing import build_preprocessor
+from src.temporal_features import (
+	FoldAwareRainfallAnomaly,
+	forward_chaining_oof_probabilities,
+	forward_chaining_year_splits,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -163,6 +168,7 @@ class EarlyStoppingXGBClassifier(ClassifierMixin, BaseEstimator):
 def _pipeline(classifier: Any, training_features: pd.DataFrame) -> Pipeline:
 	return Pipeline(
 		[
+			("fold_rainfall_anomaly", FoldAwareRainfallAnomaly()),
 			("preprocessor", build_preprocessor(training_features)),
 			("classifier", classifier),
 		]
@@ -465,20 +471,23 @@ def train_real_model_v2(
 	X_train = training[FEATURE_COLUMNS].copy()
 	y_train = training[TARGET].to_numpy(dtype=np.int8)
 	groups = training["year"].to_numpy(dtype=int)
-	n_splits = 5
-	if len(np.unique(groups)) < n_splits:
-		raise ValueError(f"At least {n_splits} training years are required for GroupKFold.")
-	group_kfold = GroupKFold(n_splits=n_splits)
-	cv_splits = list(group_kfold.split(X_train, y_train, groups))
-	for fold, (_, validation_indices) in enumerate(cv_splits, start=1):
-		if len(np.unique(y_train[validation_indices])) != 2:
-			raise ValueError(f"GroupKFold year fold {fold} contains one class; cannot calculate ROC-AUC.")
+	cv_splits = forward_chaining_year_splits(
+		groups,
+		y_train,
+		n_splits=5,
+		min_train_years=4,
+	)
 
 	searches: dict[str, RandomizedSearchCV] = {}
 	best_estimators: dict[str, Pipeline] = {}
 	cv_metrics: dict[str, dict[str, dict[str, Any]]] = {}
 	for name, (classifier, distributions) in _search_spaces().items():
-		logger.info("Searching %s with %d randomized trials and 5 GroupKFold year folds", name, n_iter)
+		logger.info(
+			"Searching %s with %d randomized trials and %d forward year folds",
+			name,
+			n_iter,
+			len(cv_splits),
+		)
 		search = RandomizedSearchCV(
 			estimator=_pipeline(classifier, X_train),
 			param_distributions=distributions,
@@ -499,7 +508,10 @@ def train_real_model_v2(
 			metric: {
 				"mean": float(search.cv_results_[f"mean_test_{metric}"][index]),
 				"std": float(search.cv_results_[f"std_test_{metric}"][index]),
-				"fold_scores": [float(search.cv_results_[f"split{fold}_test_{metric}"][index]) for fold in range(n_splits)],
+				"fold_scores": [
+					float(search.cv_results_[f"split{fold}_test_{metric}"][index])
+					for fold in range(len(cv_splits))
+				],
 			}
 			for metric in SCORING
 		}
@@ -511,24 +523,24 @@ def train_real_model_v2(
 	)
 	selected_search = searches[selected_name]
 	selected_estimator = selected_search.best_estimator_
-	oof_probabilities = cross_val_predict(
-		clone(selected_estimator),
+	oof_labels, oof_probabilities = forward_chaining_oof_probabilities(
+		selected_estimator,
 		X_train,
 		y_train,
-		cv=cv_splits,
-		method="predict_proba",
-		n_jobs=1,
-	)[:, 1]
+		cv_splits,
+	)
 	training_prevalence = float(y_train.mean())
 	minimum_precision = max(0.05, 2.0 * training_prevalence)
 	threshold, threshold_metadata = _select_threshold(
-		y_train,
+		oof_labels,
 		oof_probabilities,
 		recall_target=0.8,
 		minimum_precision=minimum_precision,
 	)
 	threshold_metadata["oof_rows"] = int(len(oof_probabilities))
-	threshold_metadata["oof_method"] = "five-fold GroupKFold by calendar year, training years only"
+	threshold_metadata["oof_method"] = (
+		"Forward-chaining calendar-year blocks; initial warm-up years excluded from OOF threshold selection"
+	)
 	threshold_metadata["training_prevalence"] = training_prevalence
 
 	final_model = _freeze_and_refit(selected_estimator, X_train, y_train)
@@ -600,7 +612,10 @@ def train_real_model_v2(
 		"test_years": [TEST_START_YEAR, TEST_END_YEAR],
 		"selected_model": selected_name,
 		"randomized_search_iterations_per_model": n_iter,
-		"cv": "GroupKFold(n_splits=5), grouped by calendar year; training years only",
+		"cv": (
+			"Five expanding-window calendar-year folds; each validation block is later than "
+			"its training years, with four initial warm-up years"
+		),
 		"train_test_overlap": overlap,
 		"class_weights": "balanced Logistic Regression and Random Forest; scale_pos_weight for XGBoost",
 	}
@@ -637,7 +652,7 @@ def train_real_model_v2(
 		"model_selection": {
 			"selected_model": selected_name,
 			"candidates": list(searches),
-			"selection_metric": "GroupKFold mean PR-AUC, with ROC-AUC as tie-breaker",
+			"selection_metric": "Forward-chaining mean PR-AUC, with ROC-AUC as tie-breaker",
 			"randomized_search_iterations_per_model": n_iter,
 			"best_parameters": {name: search.best_params_ for name, search in searches.items()},
 			"xgboost_early_stopping": "Each fold's chronological final 15% is the early-stopping evaluation tail; selected tree count is frozen before full training-year refit.",

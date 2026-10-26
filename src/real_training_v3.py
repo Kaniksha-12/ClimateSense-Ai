@@ -24,7 +24,7 @@ from sklearn.metrics import (
 	recall_score,
 	roc_auc_score,
 )
-from sklearn.model_selection import GroupKFold, RandomizedSearchCV, cross_val_predict, cross_val_score
+from sklearn.model_selection import RandomizedSearchCV, cross_val_score
 
 from scripts.build_real_dataset_v2 import IFI_PATH, prepare_event_labels
 from src.fetch_features import DISTRICT_NAMES
@@ -35,6 +35,10 @@ from src.label_contract import (
 )
 from src.real_training_v2 import EarlyStoppingXGBClassifier, _pipeline, _search_spaces
 from src.preprocessing import build_preprocessor
+from src.temporal_features import (
+	forward_chaining_oof_probabilities,
+	forward_chaining_year_splits,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -220,7 +224,10 @@ def _select_validation_threshold(
 		"precision_constraint_met": True,
 		"minimum_precision": MINIMUM_PRECISION,
 		"threshold_candidates_from_oof": True,
-		"selection_data": "2015-2018 held-out validation block; threshold candidates derived from GroupKFold OOF probabilities for 2000-2014",
+		"selection_data": (
+			"2015-2018 held-out validation block; threshold candidates derived from "
+			"forward-chaining OOF probabilities for 2000-2014, excluding warm-up years"
+		),
 	}
 
 
@@ -355,16 +362,22 @@ def _train_configuration(
 	if set(np.unique(y_core)) != {0, 1} or set(np.unique(y_validation)) != {0, 1}:
 		raise ValueError(f"Both classes are required in core and validation for {label_name}/{feature_name}.")
 	groups = core["year"].to_numpy(dtype=int)
-	if len(np.unique(groups)) < 5:
-		raise ValueError("At least five core years are required for GroupKFold.")
-	splits = list(GroupKFold(n_splits=5).split(X_core, y_core, groups))
-	for fold, (_, valid_indices) in enumerate(splits, 1):
-		if len(np.unique(y_core[valid_indices])) != 2:
-			raise ValueError(f"CV fold {fold} has a single class for {label_name}/{feature_name}.")
+	splits = forward_chaining_year_splits(
+		groups,
+		y_core,
+		n_splits=5,
+		min_train_years=4,
+	)
 	searches = {}
 	candidates: list[dict[str, Any]] = []
 	for model_name, (classifier, distributions) in _search_spaces().items():
-		logger.info("%s/%s: %s search, 20 trials, GroupKFold years", label_name, feature_name, model_name)
+		logger.info(
+			"%s/%s: %s search, %d trials, forward-chaining year folds",
+			label_name,
+			feature_name,
+			model_name,
+			n_iter,
+		)
 		search = RandomizedSearchCV(
 			estimator=_pipeline(classifier, X_core),
 			param_distributions=distributions,
@@ -379,9 +392,12 @@ def _train_configuration(
 		)
 		search.fit(X_core, y_core)
 		searches[model_name] = search
-		oof = cross_val_predict(
-			clone(search.best_estimator_), X_core, y_core, cv=splits, method="predict_proba", n_jobs=1
-		)[:, 1]
+		oof_labels, oof = forward_chaining_oof_probabilities(
+			search.best_estimator_,
+			X_core,
+			y_core,
+			splits,
+		)
 		validation_probabilities = search.best_estimator_.predict_proba(X_validation)[:, 1]
 		candidates.append(
 			{
@@ -393,7 +409,7 @@ def _train_configuration(
 				"cv_mean_pr_auc": float(search.best_score_),
 				"cv_std_pr_auc": float(search.cv_results_["std_test_score"][search.best_index_]),
 				"oof_probabilities": oof,
-				"oof_threshold": _oof_threshold_summary(y_core, oof),
+				"oof_threshold": _oof_threshold_summary(oof_labels, oof),
 				"validation_probabilities": validation_probabilities,
 				"y_core": y_core,
 				"y_validation": y_validation,
@@ -412,9 +428,12 @@ def _train_configuration(
 	voting_pipeline = _pipeline(voting, X_core)
 	voting_scores = cross_val_score(voting_pipeline, X_core, y_core, cv=splits, scoring="average_precision", n_jobs=1)
 	voting_mean = float(np.mean(voting_scores))
-	voting_oof = cross_val_predict(
-		clone(voting_pipeline), X_core, y_core, cv=splits, method="predict_proba", n_jobs=1
-	)[:, 1]
+	voting_oof_labels, voting_oof = forward_chaining_oof_probabilities(
+		voting_pipeline,
+		X_core,
+		y_core,
+		splits,
+	)
 	voting_pipeline.fit(X_core, y_core)
 	candidates.append(
 		{
@@ -426,7 +445,7 @@ def _train_configuration(
 			"cv_mean_pr_auc": voting_mean,
 			"cv_std_pr_auc": float(np.std(voting_scores, ddof=1)),
 			"oof_probabilities": voting_oof,
-			"oof_threshold": _oof_threshold_summary(y_core, voting_oof),
+			"oof_threshold": _oof_threshold_summary(voting_oof_labels, voting_oof),
 			"validation_probabilities": voting_pipeline.predict_proba(X_validation)[:, 1],
 			"y_core": y_core,
 			"y_validation": y_validation,
@@ -474,7 +493,7 @@ def _markdown_report(report: dict[str, Any]) -> str:
 		"## Data and decisions",
 		"",
 		f"- Dataset rows: {report['dataset']['rows']}; next-0-to-2-day label counts: {report['label_balance']['next_0_to_2_days']['all_rows']}; same-day eligible counts: {report['label_balance']['same_day']['all_rows']}.",
-		f"- Training core: 2000–2014 GroupKFold by year; final validation: 2015–2018; final refit: 2000–2018; second-look test: 2019–2023.",
+		f"- Training core: 2000–2014 forward-chaining year folds; final validation: 2015–2018; final refit: 2000–2018; second-look test: 2019–2023.",
 		f"- Selected label: {selected['label_name']}; feature set: {selected['feature_name']}; model: {selected['model_name']}; threshold: {selected['threshold']:.6f}.",
 		f"- Validation threshold precision/recall/F2: {selected['threshold_selection']['precision']:.3f}/{selected['threshold_selection']['recall']:.3f}/{selected['threshold_selection']['f2']:.3f}; precision constraint met: {selected['threshold_selection']['precision_constraint_met']}.",
 		"- Test was scored once after all choices were frozen. Model probabilities are grouped as Low < 0.10, Medium 0.10–<0.30, High ≥ 0.30.",
@@ -838,12 +857,19 @@ def train_real_model_v3(
 		"dropped_events": dropped_events,
 		"development_protocol": {
 			"cv_years": [TRAIN_START_YEAR, CV_END_YEAR],
-			"cv": "5-fold GroupKFold grouped by calendar year, on 2000-2014 only",
+			"cv": (
+				"Five expanding-window calendar-year folds on 2000-2014; each validation "
+				"block follows its training years, with four initial warm-up years"
+			),
 			"final_validation_years": [VALIDATION_START_YEAR, TRAIN_END_YEAR],
 			"final_refit_years": [TRAIN_START_YEAR, TRAIN_END_YEAR],
 			"randomized_search_iterations_per_model": n_iter,
 			"cv_scoring": "PR-AUC / average precision",
-			"threshold_selection": "Candidate thresholds from GroupKFold OOF predictions; maximize F2 on 2015-2018 validation subject to precision >= 0.10.",
+			"threshold_selection": (
+				"Candidate thresholds from forward-chaining OOF predictions on 2000-2014 "
+				"(initial warm-up years excluded); maximize F2 on 2015-2018 validation "
+				"subject to precision >= 0.10."
+			),
 			"model_and_feature_selection": "Validation-block F2 under the precision constraint, then validation PR-AUC and CV PR-AUC tie-breaks.",
 		},
 		"selection": selected_validation,

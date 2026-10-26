@@ -31,6 +31,7 @@ from xgboost import XGBClassifier
 from src.config import MODELS_DIR, REPORTS_DIR
 from src.label_contract import IFI_SAME_DAY_SPEC_ID, validate_ifi_association_rows
 from src.preprocessing import build_preprocessor
+from src.temporal_features import FoldAwareRainfallAnomaly
 
 logger = logging.getLogger(__name__)
 
@@ -166,6 +167,7 @@ class EarlyStoppingXGBClassifier(ClassifierMixin, BaseEstimator):
 def _make_pipeline(classifier: Any, training_features: pd.DataFrame) -> Pipeline:
 	return Pipeline(
 		[
+			("fold_rainfall_anomaly", FoldAwareRainfallAnomaly()),
 			("preprocessor", build_preprocessor(training_features)),
 			("classifier", classifier),
 		]

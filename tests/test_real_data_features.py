@@ -5,6 +5,7 @@ from datetime import date
 import numpy as np
 import pandas as pd
 import pytest
+import requests
 from shapely.geometry import Point
 
 from scripts.build_real_dataset import _sample_negative_dates
@@ -15,6 +16,7 @@ from src.fetch_features import (	DISTRICT_NAMES,
 )
 from src.real_training import FEATURE_COLUMNS
 from src.fetch_features import select_era5_points
+from src.fetch_features import ERA5DailyLimitError, _request_era5_chunk
 
 
 def test_ifi_top_district_events_match_lgd_polygons_by_code():
@@ -133,3 +135,23 @@ def test_chirps_date_coverage_rejects_missing_daily_sample():
 	with pytest.raises(ValueError, match="missing days by year=.*2000.*1"):
 		verify_chirps_date_coverage(date(2000, 6, 1), date(2000, 6, 3), session=session)
 	assert "chirps20GlobalDailyP05.csv" in session.url
+
+
+class _DailyLimitSession:
+	def __init__(self):
+		self.calls = 0
+
+	def get(self, url, timeout):
+		self.calls += 1
+		response = requests.Response()
+		response.status_code = 429
+		response.reason = "Too Many Requests"
+		response._content = b'{"error":true,"reason":"Daily API request limit exceeded"}'
+		return response
+
+
+def test_era5_daily_limit_stops_without_retry():
+	session = _DailyLimitSession()
+	with pytest.raises(ERA5DailyLimitError, match="daily limit response \(HTTP 429\)"):
+		_request_era5_chunk([(19.0, 73.0)] * 3, date(2000, 5, 2), date(2000, 5, 3), session)
+	assert session.calls == 1

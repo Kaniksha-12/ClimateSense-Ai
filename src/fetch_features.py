@@ -22,6 +22,10 @@ from src.config import ROOT_DIR
 
 logger = logging.getLogger(__name__)
 
+
+class ERA5DailyLimitError(RuntimeError):
+	"""Open-Meteo reported its daily request/data quota was exhausted."""
+
 CHIRPS_DATASET_ID = "chirps20GlobalDailyP05"
 CHIRPS_ERDDAP_URL = "https://coastwatch.pfeg.noaa.gov/erddap"
 CHIRPS_GRID_RESOLUTION = 0.05
@@ -494,9 +498,16 @@ def _request_era5_chunk(
 			return data, attempt, url
 		except (requests.Timeout, requests.ConnectionError, requests.HTTPError) as exc:
 			status = getattr(getattr(exc, "response", None), "status_code", None)
+			retry_response = getattr(exc, "response", None)
+			if status == 429 and retry_response is not None:
+				body = retry_response.text
+				body_lower = body.casefold()
+				if "daily" in body_lower and any(term in body_lower for term in ("limit", "quota", "exceeded")):
+					raise ERA5DailyLimitError(
+						f"Open-Meteo daily limit response (HTTP 429): {body}"
+					) from exc
 			if attempt >= ERA5_RETRIES or (status is not None and status != 429 and status < 500):
 				raise
-			retry_response = getattr(exc, "response", None)
 			retry_after = getattr(retry_response, "headers", {}).get("Retry-After")
 			try:
 				default_delay = min(5 * 2 ** (attempt - 1), 60) if status == 429 else min(2 ** (attempt - 1), 30)

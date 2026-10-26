@@ -78,6 +78,7 @@ The IFI/ERA5 builders and real-data trainers are intentionally not presented as 
 ## Reports and generated artifacts
 
 - [Project completion and data-readiness report](reports/PROJECT_COMPLETION_REPORT.md)
+- [Model improvement audit: label quality, leakage, and experiment readiness](reports/MODEL_IMPROVEMENT_AUDIT.md)
 - [Data limitation report](reports/DATA_LIMITATION.md)
 - [Flood data compatibility research](reports/flood_data_compatibility.md)
 - Historical IFI/ERA5 evaluations: `reports/real_data_evaluation*.md` and `.json`. They describe legacy proxy-label experiments and must not be presented as verified flood-prediction performance.
