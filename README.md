@@ -2,6 +2,19 @@
 
 ClimateSense AI is a climate-risk dashboard foundation that brings conditions, prediction records, risk summaries, GIS status, and alerts into one interface. Conditions and risk summaries are demonstration data. The seeded prediction/alert are also explicitly identified as demo data; submitted predictions are persisted but are not represented as verified ML output.
 
+## Contents
+
+- [Architecture](#architecture)
+- [Requirements and local run](#requirements-and-local-run)
+- [Environment configuration](#environment-configuration)
+- [API contracts](#api-contracts)
+- [Database and alert rules](#database-and-alert-rules)
+- [ML and GIS integration](#ml-and-gis-integration)
+- [Tests and build](#tests-and-build)
+- [Deployment preparation and security](#deployment-preparation-and-security)
+- [Current limitations](#current-limitations)
+- [Data Preprocessing](#data-preprocessing)
+
 ## Architecture
 
 - `frontend/`: React + Vite dashboard; one API service calls the FastAPI endpoints.
