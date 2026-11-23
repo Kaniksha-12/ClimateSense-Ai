@@ -45,6 +45,7 @@ function Dashboard() {
         </aside>
 
         <main className="main-content" id="main-content">
+<p className="demo-note">Demonstration dashboard. Sample values only, not live monitoring or verified predictions.</p>
           <section className="intro" id="overview" aria-labelledby="overview-title">
             <div className="intro-copy">
               <span className="section-kicker">WATER INTELLIGENCE / INDIA</span>
