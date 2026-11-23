@@ -1,0 +1,43 @@
+import { CloudSun, Droplets, Thermometer, Wind } from 'lucide-react'
+import ResourceState from './ResourceState.jsx'
+import StatCard from './StatCard.jsx'
+
+function ConditionOverview({ resource }) {
+  const conditions = resource.data
+  const values = conditions && [
+    { label: 'Temperature', value: conditions.temperature, unit: '°C', icon: Thermometer, tone: 'moss' },
+    { label: 'Humidity', value: conditions.humidity, unit: '%', icon: Droplets, tone: 'blue' },
+    { label: 'Rainfall', value: conditions.rainfall, unit: 'mm', icon: CloudSun, tone: 'clay' },
+    { label: 'Air quality', value: conditions.air_quality, unit: 'AQI', icon: Wind, tone: 'sage' },
+  ]
+
+  return (
+    <section className="dashboard-section" id="conditions" aria-labelledby="conditions-title">
+      <div className="section-heading">
+        <div><span className="section-kicker">WATER & WEATHER</span><h2 id="conditions-title">Current water & weather conditions</h2></div>
+        <span className="section-location">{conditions?.location ?? 'Conditions data feed'}</span>
+      </div>
+      <ResourceState
+        status={resource.status}
+        errorMessage="Unable to load observations. Please try again."
+        onRetry={resource.retry}
+        loadingMessage="Loading water and weather observations..."
+      >
+        {values?.length ? (
+          <div className="stat-grid">
+            {values.map((item) => (
+              <StatCard key={item.label} {...item} note={conditions.demo ? 'Illustrative sample' : 'Reported dataset value'} />
+            ))}
+          </div>
+        ) : (
+          <div className="empty-state"><strong>No conditions available</strong><span>The conditions API returned no values.</span></div>
+        )}
+      </ResourceState>
+      {resource.status === 'success' && conditions?.demo && (
+        <p className="demo-note">Illustrative samples for interface development. These values are not live observations.</p>
+      )}
+    </section>
+  )
+}
+
+export default ConditionOverview

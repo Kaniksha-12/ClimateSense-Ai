@@ -1,0 +1,162 @@
+import { useState } from 'react'
+import { MapPin, Waves, CloudRain, Activity, Droplets, Wind, Gauge, Map, Radio } from 'lucide-react'
+import AlertList from '../components/AlertList.jsx'
+import ConditionOverview from '../components/ConditionOverview.jsx'
+import Header from '../components/Header.jsx'
+import MapPanel from '../components/MapPanel.jsx'
+import Navigation from '../components/Navigation.jsx'
+import PredictionTable from '../components/PredictionTable.jsx'
+import RiskOverview from '../components/RiskOverview.jsx'
+import useApiResource from '../hooks/useApiResource.js'
+import {
+  getAlerts,
+  getConditions,
+  getGIS,
+  getHealth,
+  getPredictions,
+  getRisks,
+} from '../services/api.js'
+
+function Dashboard() {
+  const health = useApiResource(getHealth)
+  const gis = useApiResource(getGIS)
+  const conditions = useApiResource(getConditions)
+  const predictions = useApiResource(getPredictions)
+  const risks = useApiResource(getRisks)
+  const alerts = useApiResource(getAlerts)
+  const [riskFilter, setRiskFilter] = useState('all')
+
+  const apiStatus = health.status === 'loading'
+    ? 'connecting'
+    : health.data?.status === 'ok' ? 'connected' : 'unavailable'
+
+  return (
+    <div className="app-shell">
+      <a className="skip-link" href="#main-content">Skip to dashboard</a>
+      <Header apiStatus={apiStatus} onRetry={health.retry} />
+      <div className="dashboard-layout">
+        <aside className="sidebar">
+          <span className="sidebar-label">INTELLIGENCE HUB</span>
+          <Navigation />
+          <div className="sidebar-note">
+            <span className="sidebar-note-mark"><MapPin size={15} aria-hidden="true" /></span>
+            <span><strong>{conditions.data?.location ?? 'Regional view'}</strong><small>Configured data location</small></span>
+          </div>
+        </aside>
+
+        <main className="main-content" id="main-content">
+          <section className="intro" id="overview" aria-labelledby="overview-title">
+            <div className="intro-copy">
+              <span className="section-kicker">WATER INTELLIGENCE / INDIA</span>
+              <h1 id="overview-title">Understand Water. Anticipate Risk.</h1>
+              <p>Explore rainfall conditions, spatial signals and climate-risk indicators in one workspace.</p>
+            </div>
+            <span className="sample-stamp"><span aria-hidden="true" /> DEMONSTRATION INTELLIGENCE HUB</span>
+          </section>
+
+          <section className="command-center" aria-label="Water monitoring overview">
+            <div className="command-heading">
+              <div>
+                <span className="section-kicker">NATIONAL WATER OBSERVATORY</span>
+                <h2>Water systems <span>at a glance</span></h2>
+                <p>Monitoring overview · India · Demonstration interface</p>
+              </div>
+              <div className="monitor-live"><span /> SYSTEM STATUS: {apiStatus === 'connected' ? 'CONNECTED' : apiStatus.toUpperCase()}</div>
+            </div>
+
+            <div className="command-grid">
+              <article className="monitor-map-panel">
+                <div className="monitor-panel-heading">
+                  <div><Map size={15} /><span>SPATIAL MONITOR</span></div>
+                  <span className="monitor-tag">SCHEMATIC VIEW</span>
+                </div>
+                <div className="monitor-map-art">
+                  <div className="map-grid-lines" />
+                  <svg viewBox="0 0 600 360" role="img" aria-label="Decorative schematic water monitoring map, not a geographic map">
+                    <defs>
+                      <linearGradient id="waterline" x1="0" y1="0" x2="1" y2="1">
+                        <stop offset="0%" stopColor="#35d6e8" stopOpacity=".1" />
+                        <stop offset="50%" stopColor="#35d6e8" stopOpacity=".8" />
+                        <stop offset="100%" stopColor="#35c6a5" stopOpacity=".2" />
+                      </linearGradient>
+                      <filter id="waterglow">
+                        <feGaussianBlur stdDeviation="4" result="blur" />
+                        <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                      </filter>
+                    </defs>
+                    <g fill="none" stroke="#28718a" strokeOpacity=".35" strokeWidth="1">
+                      <path d="M-20 72 Q100 15 195 83 T390 70 T640 32" />
+                      <path d="M-20 108 Q100 51 195 119 T390 106 T640 68" />
+                      <path d="M-20 145 Q100 88 195 156 T390 143 T640 105" />
+                      <path d="M-20 184 Q100 127 195 195 T390 182 T640 144" />
+                      <path d="M-20 225 Q100 168 195 236 T390 223 T640 185" />
+                      <path d="M-20 266 Q100 209 195 277 T390 264 T640 226" />
+                      <path d="M-20 305 Q100 248 195 316 T390 303 T640 265" />
+                    </g>
+                    <path d="M130 32 L205 55 240 92 287 104 312 139 350 155 365 194 340 229 318 258 290 282 270 324 237 300 222 266 190 242 178 209 148 188 132 151 105 127 111 90 Z"
+                      fill="rgba(53,214,232,.045)" stroke="url(#waterline)" strokeWidth="2.2" filter="url(#waterglow)" />
+                    <path d="M151 52 Q202 88 174 126 T221 190 T251 251 T278 298" fill="none" stroke="#35d6e8" strokeOpacity=".7" strokeWidth="2" strokeDasharray="5 7" />
+                    <path d="M117 132 Q175 149 209 137 T276 169 T334 202" fill="none" stroke="#35c6a5" strokeOpacity=".65" strokeWidth="2" />
+                    {[[169,87],[223,134],[193,191],[252,225],[286,171],[240,278],[323,203]].map(([x,y],i) => (
+                      <g key={i} transform={`translate(${x} ${y})`}>
+                        <circle r="13" fill="#35d6e8" opacity=".08" />
+                        <circle r="6" fill="#35d6e8" opacity=".22" />
+                        <circle r="3" fill="#6cf3f1" />
+                      </g>
+                    ))}
+                    <g fill="#8eb8c9" fontSize="10" fontFamily="monospace">
+                      <text x="370" y="70">WATER NETWORK</text>
+                      <text x="370" y="86" fill="#35d6e8">SCHEMATIC ONLY</text>
+                      <text x="370" y="250">GIS STATUS</text>
+                      <text x="370" y="266" fill={gis.data?.status === 'ok' ? '#35c6a5' : '#f0bc69'}>{gis.data?.status === 'ok' ? 'DATA RECEIVED' : 'AWAITING LAYER'}</text>
+                    </g>
+                  </svg>
+                  <div className="map-art-legend"><span><i className="legend-cyan" /> Water network concept</span><span><i className="legend-teal" /> Monitoring points concept</span></div>
+                </div>
+                <div className="monitor-map-footer"><span><Waves size={14} /> Water intelligence workspace</span><span>Geographic layer status: {gis.status === 'success' && gis.data?.status === 'ok' ? 'Available' : 'Not confirmed'}</span></div>
+              </article>
+
+              <div className="monitor-side">
+                <article className="monitor-chart-panel">
+                  <div className="monitor-panel-heading"><div><Activity size={15} /><span>OBSERVATION PROFILE</span></div><span className="monitor-tag">ILLUSTRATIVE</span></div>
+                  <div className="mini-chart-title">Rainfall signal <span>Concept visual</span></div>
+                  <svg className="rainfall-chart" viewBox="0 0 320 132" role="img" aria-label="Illustrative rainfall chart, not measured time-series data">
+                    <defs><linearGradient id="rainfill" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#35d6e8" stopOpacity=".28"/><stop offset="100%" stopColor="#35d6e8" stopOpacity="0"/></linearGradient></defs>
+                    {[22,48,74,100].map(y=><line key={y} x1="8" y1={y} x2="312" y2={y} stroke="#25485b" strokeDasharray="3 5" />)}
+                    <path d="M8 93 C28 85 34 98 53 77 S81 91 102 65 S130 83 151 51 S180 67 200 43 S230 61 250 29 S285 50 312 18 L312 112 L8 112 Z" fill="url(#rainfill)" />
+                    <path d="M8 93 C28 85 34 98 53 77 S81 91 102 65 S130 83 151 51 S180 67 200 43 S230 61 250 29 S285 50 312 18" fill="none" stroke="#35d6e8" strokeWidth="2.5" />
+                    <circle cx="250" cy="29" r="4" fill="#35d6e8" stroke="#0b2538" strokeWidth="2" />
+                  </svg>
+                  <div className="chart-axis"><span>Earlier</span><span>Time series not connected</span><span>Latest</span></div>
+                </article>
+
+                <article className="monitor-status-panel">
+                  <div className="monitor-panel-heading"><div><Radio size={15} /><span>DATA CONNECTIONS</span></div></div>
+                  <div className="source-row"><span className="source-icon"><CloudRain size={15} /></span><span><strong>Conditions API</strong><small>Weather observations endpoint</small></span><i className={conditions.status === 'success' ? 'source-dot good' : 'source-dot'} /></div>
+                  <div className="source-row"><span className="source-icon"><Droplets size={15} /></span><span><strong>Risk API</strong><small>Risk indicator records</small></span><i className={risks.status === 'success' ? 'source-dot good' : 'source-dot'} /></div>
+                  <div className="source-row"><span className="source-icon"><Gauge size={15} /></span><span><strong>Prediction API</strong><small>Model output records</small></span><i className={predictions.status === 'success' ? 'source-dot good' : 'source-dot'} /></div>
+                  <div className="source-row"><span className="source-icon"><Map size={15} /></span><span><strong>GIS API</strong><small>Geospatial output</small></span><i className={gis.status === 'success' && gis.data?.status === 'ok' ? 'source-dot good' : 'source-dot'} /></div>
+                </article>
+              </div>
+            </div>
+            <p className="monitor-disclaimer">The map and rainfall curve above are decorative concept visuals, not live geographic or measured time-series data. Use the sections below for API-returned records.</p>
+          </section>
+
+          <div className="dashboard-content">
+            <ConditionOverview resource={conditions} />
+            <RiskOverview resource={risks} filter={riskFilter} onFilterChange={setRiskFilter} />
+            <PredictionTable resource={predictions} filter={riskFilter} onFilterChange={setRiskFilter} />
+            <MapPanel resource={gis} />
+            <AlertList resource={alerts} />
+          </div>
+          <footer className="page-footer">
+            <span>ClimateSense AI <span className="footer-divider">/</span> India Water Intelligence</span>
+            <span>Demo environment · verify data sources before operational use</span>
+          </footer>
+        </main>
+      </div>
+    </div>
+  )
+}
+
+export default Dashboard
