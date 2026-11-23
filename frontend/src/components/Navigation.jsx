@@ -3,10 +3,10 @@ import { Activity, AlertTriangle, CloudSun, Layers3, ShieldCheck, Sparkles } fro
 
 const sections = [
   { label: 'Overview', href: '#overview', icon: Activity },
-  { label: 'Conditions', href: '#conditions', icon: CloudSun },
-  { label: 'Predictions', href: '#predictions', icon: Sparkles },
-  { label: 'Risk analysis', href: '#risk-analysis', icon: ShieldCheck },
-  { label: 'GIS map', href: '#gis-map', icon: Layers3 },
+  { label: 'Water & Weather', href: '#conditions', icon: CloudSun },
+  { label: 'Risk Output', href: '#predictions', icon: Sparkles },
+  { label: 'Risk Indicators', href: '#risk-analysis', icon: ShieldCheck },
+  { label: 'GIS & Flood Map', href: '#gis-map', icon: Layers3 },
   { label: 'Alerts', href: '#alerts', icon: AlertTriangle },
 ]
 

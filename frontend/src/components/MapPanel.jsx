@@ -9,8 +9,8 @@ function MapPanel({ resource }) {
   return (
     <section className="dashboard-section" id="gis-map" aria-labelledby="map-title">
       <div className="section-heading">
-        <div><span className="section-kicker">SPATIAL LAYER</span><h2 id="map-title">Climate risk map</h2></div>
-        <span className="integration-tag"><Layers3 size={13} aria-hidden="true" /> AWAITING GIS</span>
+        <div><span className="section-kicker">GEOSPATIAL INTELLIGENCE</span><h2 id="map-title">GIS & flood-risk layers</h2></div>
+        <span className="integration-tag"><Layers3 size={13} aria-hidden="true" /> GIS STATUS</span>
       </div>
       <ResourceState
         status={resource.status}
@@ -22,9 +22,9 @@ function MapPanel({ resource }) {
           <div className="map-visual" aria-hidden="true"><span className="map-symbol"><Map size={24} strokeWidth={1.5} /></span></div>
           <div className="map-copy">
             <span className={`map-status ${available ? 'ready' : ''}`}><span /> {available ? 'GeoJSON layer received' : 'No layer connected'}</span>
-            <h3>{available ? 'GIS output received' : 'GIS layer unavailable'}</h3>
+            <h3>{available ? 'Geospatial output received' : 'Geospatial layer unavailable'}</h3>
             <p>{available
-              ? 'Geographic output is available from the GIS service. Spatial processing remains with Member 3.'
+              ? 'Geographic output is available from the GIS service. The GIS service returned geographic output; inspect its features before interpreting risk.'
               : resource.data?.message ?? 'Waiting for the GIS service response.'}</p>
             {available && (
               <span className="map-meta">

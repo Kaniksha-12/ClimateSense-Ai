@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MapPin } from 'lucide-react'
+import { MapPin, Waves, CloudRain, Activity, Droplets, Wind, Gauge, Map, Radio } from 'lucide-react'
 import AlertList from '../components/AlertList.jsx'
 import ConditionOverview from '../components/ConditionOverview.jsx'
 import Header from '../components/Header.jsx'
@@ -36,22 +36,21 @@ function Dashboard() {
       <Header apiStatus={apiStatus} onRetry={health.retry} />
       <div className="dashboard-layout">
         <aside className="sidebar">
-          <span className="sidebar-label">WORKSPACE</span>
+          <span className="sidebar-label">INTELLIGENCE HUB</span>
           <Navigation />
           <div className="sidebar-note">
             <span className="sidebar-note-mark"><MapPin size={15} aria-hidden="true" /></span>
-            <span><strong>{conditions.data?.location ?? 'Regional view'}</strong><small>Sample location</small></span>
+            <span><strong>{conditions.data?.location ?? 'Regional view'}</strong><small>Configured data location</small></span>
           </div>
         </aside>
 
         <main className="main-content" id="main-content">
           <section className="intro" id="overview" aria-labelledby="overview-title">
             <div className="intro-copy">
-              <span className="section-kicker">CLIMATE INTELLIGENCE / OVERVIEW</span>
-              <h1 id="overview-title">A clearer view of climate risk.</h1>
-              <p>Conditions, model output, and risk indicators gathered in one place.</p>
+              <span className="section-kicker">WATER INTELLIGENCE / INDIA</span>
+              <h1 id="overview-title">Understand Water. Anticipate Risk.</h1>
+              <p>Explore rainfall conditions, spatial signals and climate-risk indicators in one workspace.</p>
             </div>
-            <span className="sample-stamp"><span aria-hidden="true" /> DEMONSTRATION WORKSPACE</span>
           </section>
 
           <div className="dashboard-content">
@@ -62,8 +61,8 @@ function Dashboard() {
             <AlertList resource={alerts} />
           </div>
           <footer className="page-footer">
-            <span>ClimateSense AI <span className="footer-divider">/</span> Member 4 dashboard</span>
-            <span>Sample values only · not live monitoring</span>
+            <span>ClimateSense AI <span className="footer-divider">/</span> India Water Intelligence</span>
+            <span>Climate and geospatial intelligence workspace</span>
           </footer>
         </main>
       </div>

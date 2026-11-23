@@ -14,19 +14,19 @@ function ConditionOverview({ resource }) {
   return (
     <section className="dashboard-section" id="conditions" aria-labelledby="conditions-title">
       <div className="section-heading">
-        <div><span className="section-kicker">OBSERVATIONS</span><h2 id="conditions-title">Current conditions</h2></div>
-        <span className="section-location">{conditions?.location ?? 'Conditions feed'}</span>
+        <div><span className="section-kicker">WATER & WEATHER</span><h2 id="conditions-title">Current water & weather conditions</h2></div>
+        <span className="section-location">{conditions?.location ?? 'Conditions data feed'}</span>
       </div>
       <ResourceState
         status={resource.status}
-        errorMessage="Unable to load climate data. Please try again."
+        errorMessage="Unable to load observations. Please try again."
         onRetry={resource.retry}
-        loadingMessage="Loading climate data..."
+        loadingMessage="Loading water and weather observations..."
       >
         {values?.length ? (
           <div className="stat-grid">
             {values.map((item) => (
-              <StatCard key={item.label} {...item} note={conditions.demo ? 'Sample condition' : 'Dataset condition'} />
+              <StatCard key={item.label} {...item} note={conditions.demo ? 'Preview snapshot' : 'Reported dataset value'} />
             ))}
           </div>
         ) : (
@@ -34,7 +34,7 @@ function ConditionOverview({ resource }) {
         )}
       </ResourceState>
       {resource.status === 'success' && conditions?.demo && (
-        <p className="demo-note">Sample conditions for interface development. These values are not live observations.</p>
+        <p className="demo-note">Preview snapshot · these readings are illustrative, not live observations.</p>
       )}
     </section>
   )
