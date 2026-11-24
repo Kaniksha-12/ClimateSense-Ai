@@ -317,3 +317,38 @@ def test_missing_prediction_fields_are_rejected(client: TestClient) -> None:
 
     assert response.status_code == 422
     assert response.json()["errors"]
+
+
+@pytest.mark.parametrize("location", ["", " ", "\t\n"])
+def test_blank_prediction_location_is_rejected_without_writes(client, location):
+    with SessionLocal() as session:
+        before_predictions = session.scalar(select(func.count()).select_from(PredictionRecord))
+        before_alerts = session.scalar(select(func.count()).select_from(AlertRecord))
+
+    response = client.post("/api/predictions", json={"items": [{**PREDICTION, "location": location}]})
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "Invalid request data"
+    assert response.json()["errors"][0]["loc"] == ["body", "items", 0, "location"]
+    with SessionLocal() as session:
+        assert session.scalar(select(func.count()).select_from(PredictionRecord)) == before_predictions
+        assert session.scalar(select(func.count()).select_from(AlertRecord)) == before_alerts
+
+
+def test_prediction_location_is_trimmed_before_alert_deduplication(client):
+    response = client.post("/api/predictions", json={"items": [{**PREDICTION, "location": "  Pune \t"}]})
+
+    assert response.status_code == 202
+    assert response.json()["items"][0]["location"] == "Pune"
+    alerts = client.get("/api/alerts").json()["items"]
+    assert len([alert for alert in alerts if alert["location"] == "Pune"]) == 1
+
+
+def test_mixed_batch_with_blank_location_is_rejected_atomically(client):
+    response = client.post("/api/predictions", json={"items": [
+        {**PREDICTION, "location": "Nagpur"}, {**PREDICTION, "location": " "}
+    ]})
+
+    assert response.status_code == 422
+    assert not any(item["location"] == "Nagpur" for item in client.get("/api/predictions").json()["items"])
+    assert not any(item["location"] == "Nagpur" for item in client.get("/api/alerts").json()["items"])
