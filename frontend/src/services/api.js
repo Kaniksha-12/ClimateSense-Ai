@@ -1,16 +1,12 @@
+import { requestJson } from './requestJson.js'
+
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/+$/, '')
 
-async function getJson(path) {
-  const response = await fetch(`${API_BASE_URL}${path}`)
-  if (!response.ok) {
-    throw new Error(`Request failed (${response.status})`)
-  }
-  return response.json()
-}
+const getJson = (path, options) => requestJson(`${API_BASE_URL}${path}`, options)
 
-export const getHealth = () => getJson('/api/health')
-export const getGIS = () => getJson('/api/gis')
-export const getConditions = () => getJson('/api/conditions')
-export const getPredictions = () => getJson('/api/predictions')
-export const getRisks = () => getJson('/api/risks')
-export const getAlerts = () => getJson('/api/alerts')
+export const getHealth = (options) => getJson('/api/health', options)
+export const getGIS = (options) => getJson('/api/gis', options)
+export const getConditions = (options) => getJson('/api/conditions', options)
+export const getPredictions = (options) => getJson('/api/predictions', options)
+export const getRisks = (options) => getJson('/api/risks', options)
+export const getAlerts = (options) => getJson('/api/alerts', options)
