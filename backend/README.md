@@ -127,6 +127,8 @@ If no alerts are active, the endpoint returns `200` with `items: []`. Alert gene
 
 ## Validation and errors
 
+Location names are trimmed before persistence and alert deduplication; empty or whitespace-only names are rejected. A batch containing an invalid record is rejected before any predictions or alerts are written.
+
 Prediction input validates required fields, latitude `[-90, 90]`, longitude `[-180, 180]`, risk score `[0, 1]`, supported risk types, and risk/severity levels. Invalid request bodies return `422` JSON with `detail: "Invalid request data"` and field-level `errors`.
 
 ## M5 Database
