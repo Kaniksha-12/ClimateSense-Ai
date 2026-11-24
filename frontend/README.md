@@ -18,3 +18,9 @@ VITE_API_BASE_URL=https://api.example npm run build
 ```
 
 The output is written to `dist/`; `npm run preview` serves the built frontend locally. Do not place secrets in Vite variables because they are embedded in client-side assets.
+
+## Reliability checks
+
+API requests time out after 10 seconds, including response-body reads, so a stalled backend shows the existing error and Retry state instead of loading indefinitely. Requests are cancelled when a resource unmounts or its retry starts. There is no automatic polling or retry loop.
+
+Run `npm test` (Node.js 18 or newer) for request timeout/cancellation and HTTP/JSON error regression checks. Run `npm run build` for the production build.
