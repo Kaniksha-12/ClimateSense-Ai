@@ -1,8 +1,8 @@
 from datetime import datetime
 from enum import Enum
-from typing import Any, Literal
+from typing import Annotated, Any, Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints
 
 
 class RiskType(str, Enum):
@@ -34,7 +34,7 @@ class ClimateCondition(StrictModel):
 
 
 class Risk(StrictModel):
-    location: str
+    location: Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
     risk_type: RiskType
     risk_score: float = Field(ge=0, le=1)
     risk_level: RiskLevel
