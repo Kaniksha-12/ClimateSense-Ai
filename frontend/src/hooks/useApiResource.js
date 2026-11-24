@@ -6,9 +6,10 @@ function useApiResource(request) {
 
   useEffect(() => {
     let active = true
+    const controller = new AbortController()
     setResource({ status: 'loading', data: null })
 
-    request()
+    request({ signal: controller.signal })
       .then((data) => {
         if (active) setResource({ status: 'success', data })
       })
@@ -16,7 +17,10 @@ function useApiResource(request) {
         if (active) setResource({ status: 'error', data: null })
       })
 
-    return () => { active = false }
+    return () => {
+      active = false
+      controller.abort()
+    }
   }, [request, attempt])
 
   return {
